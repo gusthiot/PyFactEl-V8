@@ -7,7 +7,7 @@ class Categorie(Fichier):
     Classe pour l'importation des données de Catégories
     """
 
-    cles = ['id_categorie', 'code_d', 'no_categorie', 'intitule', 'unite', 'id_plateforme']
+    cles = ['id_categorie', 'no_categorie', 'intitule', 'unite', 'id_plateforme', 'id_article']
     nom_fichier = "categorie.csv"
     libelle = "Catégories"
 
@@ -29,10 +29,10 @@ class Categorie(Fichier):
                     return 1
         return 0
 
-    def est_coherent(self, generaux, plateformes):
+    def est_coherent(self, artsap, plateformes):
         """
         vérifie que les données du fichier importé sont cohérentes
-        :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         :param plateformes: plateformes importées
         :return: 1 s'il y a une erreur, 0 sinon
         """
@@ -57,10 +57,10 @@ class Categorie(Fichier):
                     msg += "l'id catégorie '" + donnee['id_categorie'] + "' de la ligne " + str(ligne) +\
                            " n'est pas unique\n"
 
-            if donnee['code_d'] == "":
-                msg += "le code D de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif donnee['code_d'] != generaux.obtenir_code_d()[0] and donnee['code_d'] != generaux.obtenir_code_d()[1]:
-                msg += "le code D de la ligne " + str(ligne) + " n'est pas un code D1 ou D2\n"
+            if donnee['id_article'] == "":
+                msg += "l'id d'article SAP de la ligne " + str(ligne) + " ne peut être vide\n"
+            elif not artsap.contient_id(donnee['id_article'], ['cae', 'noshow']):
+                msg += "l'id d'article SAP de la ligne " + str(ligne) + " n'est pas un code D1 ou D2\n"
 
             if donnee['id_plateforme'] == "":
                 msg += "l'id plateforme de la ligne " + str(ligne) + " ne peut être vide\n"

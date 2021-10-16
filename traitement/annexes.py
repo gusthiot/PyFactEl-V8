@@ -11,7 +11,7 @@ class Annexes(object):
     """
     @staticmethod
     def annexes(sommes, clients, edition, livraisons, acces, machines, comptes, paramannexe, generaux,
-                users, categories, noshows, docpdf, groupes):
+                users, categories, noshows, docpdf, groupes, artsap, classes):
         """
         création des annexes
         :param sommes: sommes calculées
@@ -28,6 +28,8 @@ class Annexes(object):
         :param noshows: no show importés
         :param docpdf: paramètres d'ajout de document pdf
         :param groupes: groupes importés
+        :param artsap: articles SAP importés
+        :param classes: classes clients importées
         """
 
         if sommes.calculees == 0:
@@ -38,28 +40,28 @@ class Annexes(object):
         for code_client, scl in sommes.sommes_clients.items():
             code_client = Latex.echappe_caracteres(code_client)
             client = clients.donnees[code_client]
-            nature = Latex.echappe_caracteres(generaux.code_ref_par_code_n(client['nature']))
-            av_hc = Latex.echappe_caracteres(generaux.avantage_hc_par_code_n(client['nature']))
-            reference = nature + str(edition.annee)[2:] + Outils.mois_string(edition.mois) + "." + code_client
+            ref_fact = Latex.echappe_caracteres(classes.donnees[client['id_classe']]['ref_fact'])
+            av_hc = Latex.echappe_caracteres(classes.donnees[client['id_classe']]['avantage_HC'])
+            reference = ref_fact + str(edition.annee)[2:] + Outils.mois_string(edition.mois) + "." + code_client
             if edition.version > 0:
                 reference += "-" + str(edition.version)
 
-            filtre = generaux.filtrer_article_nul_par_code_n(client['nature'])
+            filtre = classes.donnees[client['id_classe']]['filtrer_article']
 
             contenu_prix_xaj = ""
             contenu_prix_xf = ""
             inc_fact = 1
 
             contenu_prix_lvr_xdj_tab = {}
-            for article in generaux.articles_d3:
-                contenu_prix_lvr_xdj_tab[article.code_d] = ""
+            for id_article in artsap.ids_d3:
+                contenu_prix_lvr_xdj_tab[id_article] = ""
 
             contenu_projets = ""
             contenu_details = ""
 
             todo = {}
             for donnee in paramannexe.donnees:
-                if generaux.code_ref_par_code_n(client['nature']) == "INT":
+                if classes.donnees[client['id_classe']]['ref_fact'] == "INT":
                     todo[donnee['nom']] = donnee['int']
                 elif client['mode'] == "MAIL":
                     todo[donnee['nom']] = donnee['ext_mail']
@@ -83,7 +85,7 @@ class Annexes(object):
                     if sco['c1'] > 0 and not (filtre == "OUI" and sco['c2'] == 0):
                         poste = inc_fact * 10
                         intitule = Latex.echappe_caracteres(intitule_compte + " - " +
-                                                            generaux.article_d2.intitule_long)
+                                                            artsap.donnees[artsap.id_d2]['intitule_long'])
 
                         if sco['somme_j_mm'] > 0 and not (filtre == "OUI" and sco['mj'] == 0):
                             dico_prix_xf = {'intitule': intitule, 'poste': str(poste),
@@ -96,15 +98,15 @@ class Annexes(object):
                                 ''' % dico_prix_xf
                             poste += 1
 
-                        for article in generaux.articles_d3:
-                            categorie = article.code_d
-                            if sco['sommes_cat_m'][categorie] > 0 and not (filtre == "OUI"
-                                                                           and sco['tot_cat'][article.code_d] == 0):
-                                intitule = Latex.echappe_caracteres(intitule_compte + " - " + article.intitule_long)
+                        for id_article in artsap.ids_d3:
+                            if sco['sommes_cat_m'][id_article] > 0 and not (filtre == "OUI"
+                                                                            and sco['tot_cat'][id_article] == 0):
+                                intitule = Latex.echappe_caracteres(intitule_compte + " - " +
+                                                                    artsap.donnees[id_article]['intitule_long'])
                                 dico_prix_xf = {'intitule': intitule, 'poste': str(poste),
-                                                'mm': Outils.format_2_dec(sco['sommes_cat_m'][article.code_d]),
-                                                'mr': Outils.format_2_dec(sco['sommes_cat_r'][article.code_d]),
-                                                'mj': Outils.format_2_dec(sco['tot_cat'][article.code_d])}
+                                                'mm': Outils.format_2_dec(sco['sommes_cat_m'][id_article]),
+                                                'mr': Outils.format_2_dec(sco['sommes_cat_r'][id_article]),
+                                                'mj': Outils.format_2_dec(sco['tot_cat'][id_article])}
                                 contenu_prix_xf += r'''
                                     %(poste)s & %(intitule)s & %(mm)s  & %(mr)s & %(mj)s \\
                                     \hline
@@ -122,9 +124,9 @@ class Annexes(object):
 
                     ligne = r'''%(compte)s & %(type)s & %(procede)s ''' % dico_prix_xaj
 
-                    for categorie in generaux.codes_d3():
-                        total += sco['tot_cat'][categorie]
-                        ligne += r''' & ''' + Outils.format_2_dec(sco['tot_cat'][categorie])
+                    for id_article in artsap.ids_d3:
+                        total += sco['tot_cat'][id_article]
+                        ligne += r''' & ''' + Outils.format_2_dec(sco['tot_cat'][id_article])
 
                     if total > 0:
                         dico_prix_xaj['total'] = Outils.format_2_dec(total)
@@ -136,22 +138,23 @@ class Annexes(object):
                     # ## ligne Prix LVR X/D/J - Table Client Récap Prestations livr./code D/Compte
 
                     if code_client in livraisons.sommes and id_compte in livraisons.sommes[code_client]:
-                        for article in generaux.articles_d3:
-                            if article.code_d in livraisons.sommes[code_client][id_compte]:
-                                if contenu_prix_lvr_xdj_tab[article.code_d] == "":
-                                    contenu_prix_lvr_xdj_tab[article.code_d] = r'''
+                        for id_article in artsap.ids_d3:
+                            if id_article in livraisons.sommes[code_client][id_compte]:
+                                article = artsap.donnees[id_article]
+                                if contenu_prix_lvr_xdj_tab[id_article] == "":
+                                    contenu_prix_lvr_xdj_tab[id_article] = r'''
                                         \cline{2-4}
                                         \multicolumn{1}{c}{} & \multicolumn{3}{|c|}{
-                                        ''' + Latex.echappe_caracteres(article.intitule_long) + r'''} \\
+                                        ''' + Latex.echappe_caracteres(article['intitule_long']) + r'''} \\
                                         \hline
                                         Compte & Montant & Rabais & Montant net \\
                                         \hline
                                         '''
                                 dico_prest_client = {'intitule': intitule_compte,
-                                                     'cmj': Outils.format_2_dec(sco['sommes_cat_m'][article.code_d]),
-                                                     'crj': Outils.format_2_dec(sco['sommes_cat_r'][article.code_d]),
-                                                     'cj': Outils.format_2_dec(sco['tot_cat'][article.code_d])}
-                                contenu_prix_lvr_xdj_tab[article.code_d] += r'''
+                                                     'cmj': Outils.format_2_dec(sco['sommes_cat_m'][id_article]),
+                                                     'crj': Outils.format_2_dec(sco['sommes_cat_r'][id_article]),
+                                                     'cj': Outils.format_2_dec(sco['tot_cat'][id_article])}
+                                contenu_prix_lvr_xdj_tab[id_article] += r'''
                                 %(intitule)s & %(cmj)s & %(crj)s & %(cj)s \\
                                 \hline
                                 ''' % dico_prest_client
@@ -163,11 +166,11 @@ class Annexes(object):
                                                             "Annexe facture")
                     contenu_projets += Annexes.section(client, generaux, reference, ann_pro_titre)
 
-                    contenu_projets += TablesAnnexes.table_prix_ja(sco, generaux)
+                    contenu_projets += TablesAnnexes.table_prix_ja(sco, artsap)
                     contenu_projets += TablesAnnexes.table_prix_cae_jk(code_client, id_compte, intitule_compte, sco,
                                                                        acces.sommes, categories)
                     contenu_projets += TablesAnnexes.table_prix_lvr_jd(code_client, id_compte, intitule_compte, sco,
-                                                                       livraisons.sommes, generaux)
+                                                                       livraisons.sommes, artsap)
                     if av_hc == "RABAIS":
                         contenu_projets += TablesAnnexes.table_prix_jdmu(code_client, id_compte, intitule_compte, sco,
                                                                          acces.sommes, machines, users, groupes)
@@ -181,7 +184,7 @@ class Annexes(object):
                                                                         machines, categories, acces, groupes)
                     if code_client in livraisons.sommes and id_compte in livraisons.sommes[code_client]:
                         contenu_details += TablesAnnexes.table_qte_lvr_jdu(code_client, id_compte, intitule_compte,
-                                                                           generaux, livraisons, users)
+                                                                           artsap, livraisons, users)
                     contenu_details += r'''\clearpage'''
 
                     # ## compte
@@ -201,8 +204,8 @@ class Annexes(object):
                     contenu_annexe_client += Annexes.section(client, generaux, reference,
                                                              "Récapitulatif pour le client")
 
-                    contenu_annexe_client += TablesAnnexes.table_prix_xf(scl, generaux, filtre, contenu_prix_xf)
-                    contenu_annexe_client += TablesAnnexes.table_prix_xaj(scl, generaux, contenu_prix_xaj)
+                    contenu_annexe_client += TablesAnnexes.table_prix_xf(scl, generaux, filtre, contenu_prix_xf, artsap)
+                    contenu_annexe_client += TablesAnnexes.table_prix_xaj(scl, artsap, contenu_prix_xaj)
                     if av_hc == "BONUS":
                         contenu_annexe_client += TablesAnnexes.table_points_xbmu(code_client, scl, acces.sommes,
                                                                                  machines, users, groupes)
@@ -293,7 +296,8 @@ class Annexes(object):
                     Latex.finaliser_pdf(donnee['nom'] + suffixe, donnee['chemin'])
                     if donnee['nom'] == 'Annexe-projets':
                         lignes = RecaProjet.creation_lignes(edition, sommes.sommes_comptes[code_client], client,
-                                                            generaux, acces, livraisons, comptes, categories)
+                                                            generaux, acces, livraisons, comptes, categories, artsap,
+                                                            classes)
                         RecaProjet.recap(donnee['dossier_pdf'], donnee['nom'] + suffixe, lignes)
 
             files = [f for f in os.listdir('.') if os.path.isfile(f)]

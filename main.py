@@ -20,6 +20,8 @@ from docopt import docopt
 
 from importes import (Client,
                       Acces,
+                      ArticleSap,
+                      ClasseClient,
                       CoefPrest,
                       CategPrix,
                       Compte,
@@ -142,6 +144,8 @@ try:
         subsides = Subside(dossier_source)
         cles = CleSubside(dossier_source)
         users = User(dossier_source)
+        classes = ClasseClient(dossier_source)
+        artsap = ArticleSap(dossier_source)
 
         if Outils.existe(Outils.chemin([dossier_data, DocPdf.nom_fichier])):
             docpdf = DocPdf(dossier_source)
@@ -157,7 +161,8 @@ try:
 
         if verification.verification_coherence(generaux, edition, acces, categories, categprix, clients, coefprests,
                                                comptes, grants, livraisons, machines, noshows, plafonds,
-                                               plateformes, prestations, subsides, users, docpdf, groupes, cles) > 0:
+                                               plateformes, prestations, subsides, users, docpdf, groupes, cles,
+                                               classes, artsap) > 0:
             sys.exit("Erreur dans la cohérence")
 
         ## génération du dossier destination
@@ -205,7 +210,7 @@ try:
                         users.nom_fichier, generaux.nom_fichier, grants.nom_fichier, edition.nom_fichier,
                         categprix.nom_fichier, paramannexe.nom_fichier, noshows.nom_fichier, plafonds.nom_fichier,
                         plateformes.nom_fichier, subsides.nom_fichier, paramtexte.nom_fichier, groupes.nom_fichier,
-                        cles.nom_fichier]:
+                        cles.nom_fichier, artsap.nom_fichier, classes.nom_fichier]:
             dossier_destination.ecrire(fichier, dossier_source.lire(fichier))
         if docpdf is not None:
             dossier_destination.ecrire(docpdf.nom_fichier, dossier_source.lire(docpdf.nom_fichier))
@@ -216,7 +221,7 @@ try:
         acces.calcul_montants(machines, categprix, clients, verification, comptes, groupes)
         noshows.calcul_montants(machines, categprix, clients, comptes, verification, groupes)
 
-        sommes = Sommes(verification, generaux)
+        sommes = Sommes(verification, generaux, artsap)
         sommes.calculer_toutes(livraisons, acces, clients, noshows)
 
         for donnee in paramannexe.donnees:
@@ -228,14 +233,14 @@ try:
         ## traitement
 
         articles = Articles(edition)
-        articles.generer(generaux, categories, prestations, paramtexte)
+        articles.generer(artsap, categories, prestations, paramtexte)
         articles.csv(dossier_destination, paramtexte)
         tarifs = Tarifs(edition)
-        tarifs.generer(generaux, categories, prestations, categprix, coefprests)
+        tarifs.generer(classes, categories, prestations, categprix, coefprests)
         tarifs.csv(dossier_destination, paramtexte)
         transactions = Transactions(edition)
         transactions.generer(acces, noshows, livraisons, prestations, machines, categprix, comptes, clients, users,
-                             plateformes, generaux, articles, tarifs, subsides, plafonds, grants, groupes, cles,
+                             plateformes, classes, articles, tarifs, subsides, plafonds, grants, groupes, cles,
                              paramtexte)
         transactions.csv(dossier_destination, paramtexte)
 
@@ -255,32 +260,32 @@ try:
             new_grants.csv(DossierDestination(dossier_enregistrement))
 
         bilan_trs = BilansTransacts(edition)
-        bilan_trs.generer(trans_vals, grants, plafonds, comptes, clients, subsides, paramtexte, paramannexe, generaux,
+        bilan_trs.generer(trans_vals, grants, plafonds, comptes, clients, subsides, paramtexte, paramannexe, artsap,
                           DossierDestination(dossier_enregistrement))
 
         # faire les annexes avant la facture, que le ticket puisse vérifier leur existence
         if Latex.possibles():
             Annexes.annexes(sommes, clients, edition, livraisons, acces, machines, comptes, paramannexe,
-                            generaux, users, categories, noshows, docpdf, groupes)
+                            generaux, users, categories, noshows, docpdf, groupes, artsap, classes)
 
         Outils.copier_dossier("./reveal.js/", "js", dossier_enregistrement)
         Outils.copier_dossier("./reveal.js/", "css", dossier_enregistrement)
         facture_prod = Facture()
         f_html_sections = facture_prod.factures(sommes, dossier_destination, edition, generaux, clients, comptes,
-                                                paramannexe, bilan_trs)
+                                                paramannexe, bilan_trs, artsap, classes)
 
         prod2qual = Prod2Qual(dossier_source)
         if prod2qual.actif:
             facture_qual = Facture(prod2qual)
-            generaux_qual = Generaux(dossier_source, prod2qual)
-            facture_qual.factures(sommes, dossier_destination, edition, generaux_qual, clients, comptes, paramannexe,
-                                  bilan_trs)
+            facture_qual.factures(sommes, dossier_destination, edition, generaux, clients, comptes, paramannexe,
+                                  bilan_trs, artsap, classes)
 
-        bm_lignes = BilanMensuel.creation_lignes(edition, sommes, clients, generaux)
-        BilanMensuel.bilan(dossier_destination, edition, generaux, bm_lignes)
-        bc_lignes = BilanComptes.creation_lignes(edition, sommes, clients, generaux, comptes)
-        BilanComptes.bilan(dossier_destination, edition, generaux, bc_lignes)
-        det_lignes = Detail.creation_lignes(edition, sommes, clients, generaux, acces, livraisons, comptes, categories)
+        bm_lignes = BilanMensuel.creation_lignes(edition, sommes, clients, artsap, classes)
+        BilanMensuel.bilan(dossier_destination, edition, artsap, bm_lignes)
+        bc_lignes = BilanComptes.creation_lignes(edition, sommes, clients, comptes, artsap, classes)
+        BilanComptes.bilan(dossier_destination, edition, artsap, bc_lignes)
+        det_lignes = Detail.creation_lignes(edition, sommes, clients, artsap, acces, livraisons, comptes, categories,
+                                            classes)
         Detail.detail(dossier_destination, edition, det_lignes)
 
         cae_lignes = Recapitulatifs.cae_lignes(edition, acces, comptes, clients, users, machines, categories, groupes)

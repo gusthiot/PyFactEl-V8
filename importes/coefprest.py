@@ -7,34 +7,35 @@ class CoefPrest(Fichier):
     Classe pour l'importation des données de Coefficients Prestations
     """
 
-    cles = ['nature', 'categorie', 'coefficient']
+    cles = ['id_classe', 'id_article', 'coefficient']
     nom_fichier = "coeffprestation.csv"
     libelle = "Coefficients Prestations"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def contient_categorie(self, categorie):
+    def contient_article(self, id_article):
         """
-        vérifie si la catégorie est présente
-        :param categorie: la catégorie à vérifier
+        vérifie si l'id de l'article SAP est présent
+        :param id_article: l'id article à vérifier
         :return: 1 si présente, 0 sinon
         """
         if self.verifie_coherence == 1:
             for cle, coefprest in self.donnees.items():
-                if coefprest['categorie'] == categorie:
+                if coefprest['id_article'] == id_article:
                     return 1
         else:
             for coefprest in self.donnees:
-                if coefprest['categorie'] == categorie:
+                if coefprest['id_article'] == id_article:
                     return 1
         return 0
 
-    def est_coherent(self, generaux):
+    def est_coherent(self, classes, artsap):
         """
         vérifie que les données du fichier importé sont cohérentes (si couple catégorie - classe de tarif est unique),
         et efface les colonnes mois et année
-        :param generaux: paramètres généraux
+        :param classes: classes clients importées
+        :param artsap: articles SAP importés
         :return: 1 s'il y a une erreur, 0 sinon
         """
 
@@ -44,56 +45,56 @@ class CoefPrest(Fichier):
 
         msg = ""
         ligne = 1
-        categories = []
+        articles = []
         couples = []
         donnees_dict = {}
-        natures = []
+        clas = []
 
         del self.donnees[0]
         for donnee in self.donnees:
-            if donnee['nature'] == "":
-                msg += "la nature client de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif donnee['nature'] not in generaux.obtenir_code_n():
-                msg += "la nature client de la ligne " + str(ligne) + " n'existe pas dans les codes N\n"
-            elif donnee['nature'] not in natures:
-                if donnee['nature'] not in natures:
-                    natures.append(donnee['nature'])
+            if donnee['id_classe'] == "":
+                msg += "l'id classe client de la ligne " + str(ligne) + " ne peut être vide\n"
+            elif not classes.contient_id(donnee['id_classe']):
+                msg += "l'id classe client de la ligne " + str(ligne) + " n'existe pas dans les codes N\n"
+            elif donnee['id_classe'] not in clas:
+                if donnee['id_classe'] not in clas:
+                    clas.append(donnee['id_classe'])
 
-            if donnee['categorie'] == "":
-                msg += "la catégorie de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif donnee['categorie'] not in generaux.codes_d3():
-                msg += "la catégorie '" + donnee['categorie'] + "' de la ligne " + str(ligne) +\
-                       " n'existe pas dans les paramètres D3\n"
-            elif donnee['categorie'] not in categories:
-                categories.append(donnee['categorie'])
+            if donnee['id_article'] == "":
+                msg += "l'id article SAP de la ligne " + str(ligne) + " ne peut être vide\n"
+            elif not artsap.contient_id(donnee['id_article'], ['lvr']):
+                msg += "l'id d'article SAP '" + donnee['id_article'] + "' de la ligne " + str(ligne) +\
+                       " n'est pas un code D3\n"
+            elif donnee['id_article'] not in articles:
+                articles.append(donnee['id_article'])
 
-            couple = [donnee['categorie'], donnee['nature']]
+            couple = [donnee['id_article'], donnee['id_classe']]
             if couple not in couples:
                 couples.append(couple)
             else:
-                msg += "Couple categorie '" + donnee['categorie'] + "' et nature '" + \
-                       donnee['nature'] + "' de la ligne " + str(ligne) + " pas unique\n"
+                msg += "Couple id article SAP '" + donnee['id_article'] + "' et id classe client '" + \
+                       donnee['id_classe'] + "' de la ligne " + str(ligne) + " pas unique\n"
 
             donnee['coefficient'], info = Outils.est_un_nombre(donnee['coefficient'], "le coefficient", ligne, 2, 0)
             msg += info
 
-            donnees_dict[donnee['nature'] + donnee['categorie']] = donnee
+            donnees_dict[donnee['id_classe'] + donnee['id_article']] = donnee
             ligne += 1
 
         self.donnees = donnees_dict
         self.verifie_coherence = 1
 
-        for categorie in generaux.codes_d3():
-            if categorie not in categories:
-                msg += "La categorie D3 '" + categorie + "' dans les paramètres généraux n'est pas présente dans " \
+        for id_article in artsap.donnees.keys():
+            if artsap.donnees[id_article]['flux'] == 'lvr' and id_article not in articles:
+                msg += "L'id article SAP D3 '" + id_article + "' n'est pas présent dans "\
                                                          "les coefficients de prestations\n"
 
-        for categorie in categories:
-            for nature in natures:
-                couple = [categorie, nature]
+        for id_article in articles:
+            for id_classe in clas:
+                couple = [id_article, id_classe]
                 if couple not in couples:
-                    msg += "Couple categorie '" + categorie + "' et nature client '" + \
-                           nature + "' n'existe pas\n"
+                    msg += "Couple id article SAP '" + id_article + "' et id classe client '" + \
+                           id_classe + "' n'existe pas\n"
 
         if msg != "":
             msg = self.libelle + "\n" + msg

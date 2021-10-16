@@ -8,17 +8,17 @@ class PlafSubside(Fichier):
     """
 
     nom_fichier = "plafsubside.csv"
-    cles = ['type', 'code_d', 'max_mois', 'max_compte']
+    cles = ['type', 'id_article', 'max_mois', 'max_compte']
     libelle = "Plafonds Subsides"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def est_coherent(self, subsides, generaux):
+    def est_coherent(self, subsides, artsap):
         """
         vérifie que les données du fichier importé sont cohérentes
         :param subsides: subsides importés
-        :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         :return: 1 s'il y a une erreur, 0 sinon
         """
 
@@ -38,17 +38,17 @@ class PlafSubside(Fichier):
             elif subsides.contient_type(donnee['type']) == 0:
                 msg += "le type '" + donnee['type'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
-            if donnee['code_d'] == "":
-                msg += "la code D de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif donnee['code_d'] not in generaux.obtenir_code_d():
-                msg += "la code D de la ligne " + str(ligne) + " n'existe pas dans les codes D\n"
+            if donnee['id_article'] == "":
+                msg += "l'id article SAP de la ligne " + str(ligne) + " ne peut être vide\n"
+            elif not artsap.contient_id(donnee['id_article']):
+                msg += "l'id article SAP de la ligne " + str(ligne) + " n'existe pas dans les codes D\n"
 
-            couple = [donnee['type'], donnee['code_d']]
+            couple = [donnee['type'], donnee['id_article']]
             if couple not in couples:
                 couples.append(couple)
             else:
-                msg += "Couple type '" + donnee['type'] + "' et code D '" + \
-                       donnee['code_d'] + "' de la ligne " + str(ligne) + " pas unique\n"
+                msg += "Couple type '" + donnee['type'] + "' et id article SAP '" + \
+                       donnee['id_article'] + "' de la ligne " + str(ligne) + " pas unique\n"
 
             donnee['max_mois'], info = Outils.est_un_nombre(donnee['max_mois'], "le max mensuel", ligne, 2, 0)
             msg += info
@@ -56,7 +56,7 @@ class PlafSubside(Fichier):
             donnee['max_compte'], info = Outils.est_un_nombre(donnee['max_compte'], "le max compte", ligne, 2, 0)
             msg += info
 
-            donnees_dict[donnee['type'] + donnee['code_d']] = donnee
+            donnees_dict[donnee['type'] + donnee['id_article']] = donnee
             ligne += 1
 
         self.donnees = donnees_dict

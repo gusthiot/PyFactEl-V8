@@ -78,11 +78,11 @@ class TablesAnnexes(object):
             return ""
 
     @staticmethod
-    def table_prix_xaj(scl, generaux, contenu_prix_xaj):
+    def table_prix_xaj(scl, artsap, contenu_prix_xaj):
         """
         Prix XA/J - Table Client Récap Articles/Compte
         :param scl: sommes client calculées
-        :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         :param contenu_prix_xaj: contenu généré de la table
         :return: table au format latex
         """
@@ -94,10 +94,11 @@ class TablesAnnexes(object):
             \hline
             Projet & Type & \multicolumn{1}{c|}{Procédés}'''
 
-        for article in generaux.articles_d3:
+        for id_article in artsap.ids_d3:
+            article = artsap.donnees[id_article]
             structure += r'''r|'''
             contenu += r''' & \multicolumn{1}{c|}{
-            ''' + Latex.echappe_caracteres(article.intitule_court) + r'''}'''
+            ''' + Latex.echappe_caracteres(article['intitule_court']) + r'''}'''
         structure += r'''}'''
         contenu += r'''& \multicolumn{1}{c|}{Total} \\
             \hline
@@ -110,8 +111,8 @@ class TablesAnnexes(object):
 
         contenu += r'''Total article & & %(procedes)s''' % dico
 
-        for categorie in generaux.codes_d3():
-            contenu += r''' & ''' + Outils.format_2_dec(scl['tot_cat'][categorie])
+        for id_article in artsap.ids_d3:
+            contenu += r''' & ''' + Outils.format_2_dec(scl['tot_cat'][id_article])
 
         contenu += r'''& %(total)s \\
             \hline
@@ -120,13 +121,14 @@ class TablesAnnexes(object):
         return Latex.long_tableau(contenu, structure, legende)
 
     @staticmethod
-    def table_prix_xf(scl, generaux, filtre, contenu_prix_xf):
+    def table_prix_xf(scl, generaux, filtre, contenu_prix_xf, artsap):
         """
         Prix XF - Table Client Récap Postes de la facture
         :param scl: sommes client calculées
         :param generaux: paramètres généraux
         :param filtre: si nul pour code n
         :param contenu_prix_xf: contenu généré de la table
+        :param artsap: articles SAP importés
         :return: table au format latex
         """
 
@@ -136,10 +138,11 @@ class TablesAnnexes(object):
         if scl['somme_t'] > 0 or (filtre == "NON" and brut > 0):
             structure = r'''{|c|l|r|r|r|}'''
             legende = r'''Récapitulatif des postes de la facture'''
+            article_d1 = artsap.donnees[artsap.id_d1]
 
             dico = {'resm': Outils.format_2_dec(scl['rm']), 'resr': Outils.format_2_dec(scl['rr']),
                     'res': Outils.format_2_dec(scl['r']), 'p_res': generaux.poste_reservation,
-                    'int_res': Latex.echappe_caracteres(generaux.article_d1.intitule_long)}
+                    'int_res': Latex.echappe_caracteres(article_d1['intitule_long'])}
 
             contenu = r'''
                 \hline
@@ -163,13 +166,13 @@ class TablesAnnexes(object):
             return ""
 
     @staticmethod
-    def table_qte_lvr_jdu(code_client, id_compte, intitule_compte, generaux, livraisons, users):
+    def table_qte_lvr_jdu(code_client, id_compte, intitule_compte, artsap, livraisons, users):
         """
         Qté LVR J/D/U - Table Compte Détail Quantités livrées/Prestation (code D)/User
         :param code_client: code du client concerné
         :param id_compte: id du compte concerné
         :param intitule_compte: intitulé du compte concerné
-        :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         :param livraisons: livraisons importées
         :param users: users importés
         :return: table au format latex
@@ -182,8 +185,9 @@ class TablesAnnexes(object):
             '''
         i = 0
         somme = livraisons.sommes[code_client][id_compte]
-        for article in generaux.articles_d3:
-            if article.code_d in somme:
+        for id_article in artsap.ids_d3:
+            if id_article in somme:
+                article = artsap.donnees[id_article]
                 if i == 0:
                     i += 1
                 else:
@@ -192,11 +196,11 @@ class TablesAnnexes(object):
                 contenu += r'''
                     \hline
                     \multicolumn{1}{|l|}{
-                    \textbf{''' + intitule_compte + " - " + Latex.echappe_caracteres(article.intitule_long) + r'''
+                    \textbf{''' + intitule_compte + " - " + Latex.echappe_caracteres(article['intitule_long']) + r'''
                     }} & Quantité & Unité & Rabais \\
                     \hline
                     '''
-                for no_prestation, sip in sorted(somme[article.code_d].items()):
+                for no_prestation, sip in sorted(somme[id_article].items()):
                     dico_prestations = {'nom': Latex.echappe_caracteres(sip['nom']),
                                         'num': no_prestation,
                                         'quantite': "%.1f" % sip['quantite'],
@@ -356,7 +360,7 @@ class TablesAnnexes(object):
             return ""
 
     @staticmethod
-    def table_prix_lvr_jd(code_client, id_compte, intitule_compte, sco, sommes_livraisons, generaux):
+    def table_prix_lvr_jd(code_client, id_compte, intitule_compte, sco, sommes_livraisons, artsap):
         """
         Prix LVR J/D - Table Compte Récap Prestations livrées/code D
         :param code_client: code du client concerné
@@ -364,7 +368,7 @@ class TablesAnnexes(object):
         :param intitule_compte: intitulé du compte concerné
         :param sco: sommes compte calculées
         :param sommes_livraisons: sommes des livraisons importées
-        :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         :return: table au format latex
         """
 
@@ -373,8 +377,9 @@ class TablesAnnexes(object):
             structure = r'''{|l|r|c|r|r|r|}'''
             legende = r'''Consommables et autres prestations'''
             contenu_prests = ""
-            for article in generaux.articles_d3:
-                if article.code_d in somme and sco['sommes_cat_m'][article.code_d] > 0:
+            for id_article in artsap.ids_d3:
+                if id_article in somme and sco['sommes_cat_m'][id_article] > 0:
+                    article = artsap.donnees[id_article]
                     if contenu_prests != "":
                         contenu_prests += r'''
                             \multicolumn{6}{c}{} \\
@@ -383,12 +388,13 @@ class TablesAnnexes(object):
                     contenu_prests += r'''
                         \hline
                         \multicolumn{1}{|l|}{
-                        \textbf{''' + intitule_compte + " - " + Latex.echappe_caracteres(article.intitule_long) + r'''
+                        \textbf{''' + intitule_compte + " - " + \
+                                      Latex.echappe_caracteres(article['intitule_long']) + r'''
                         }} & \multicolumn{1}{c|}{Quantité} & Unité & \multicolumn{1}{c|}{P.U.}
                         & \multicolumn{1}{c|}{Montant} & \multicolumn{1}{c|}{Rabais} \\
                         \hline
                         '''
-                    for no_prestation, sip in sorted(somme[article.code_d].items()):
+                    for no_prestation, sip in sorted(somme[id_article].items()):
                         if sip['montant'] > 0:
                             dico_prestations = {'nom': Latex.echappe_caracteres(sip['nom']),
                                                 'num': no_prestation,
@@ -402,8 +408,8 @@ class TablesAnnexes(object):
                                 & %(rabais)s  \\
                                 \hline
                                 ''' % dico_prestations
-                    dico_prestations = {'montant': Outils.format_2_dec(sco['sommes_cat_m'][article.code_d]),
-                                        'rabais': Outils.format_2_dec(sco['sommes_cat_r'][article.code_d])}
+                    dico_prestations = {'montant': Outils.format_2_dec(sco['sommes_cat_m'][id_article]),
+                                        'rabais': Outils.format_2_dec(sco['sommes_cat_r'][id_article])}
                     contenu_prests += r'''
                         \multicolumn{4}{|r|}{Total} & %(montant)s & %(rabais)s  \\
                         \hline
@@ -468,11 +474,11 @@ class TablesAnnexes(object):
             return ""
 
     @staticmethod
-    def table_prix_ja(sco, generaux):
+    def table_prix_ja(sco, artsap):
         """
         Prix JA - Table Compte Récap Articles
         :param sco: sommes compte calculées
-        :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         :return: table au format latex
         """
 
@@ -486,22 +492,24 @@ class TablesAnnexes(object):
             \hline'''
 
         if sco['somme_j_mm'] > 0:
+            article_d2 = artsap.donnees[artsap.id_d2]
             dico = {'mm': Outils.format_2_dec(sco['somme_j_mm']), 'mr': Outils.format_2_dec(sco['somme_j_mr']),
                     'mj': Outils.format_2_dec(sco['mj']),
-                    'int_proc': Latex.echappe_caracteres(generaux.article_d2.intitule_long)}
+                    'int_proc': Latex.echappe_caracteres(article_d2['intitule_long'])}
             contenu += r'''
                 %(int_proc)s & %(mm)s & %(mr)s & %(mj)s \\
                 \hline
                 ''' % dico
 
         total = sco['mj']
-        for article in generaux.articles_d3:
-            total += sco['tot_cat'][article.code_d]
-            if sco['sommes_cat_m'][article.code_d]:
-                dico = {'intitule': Latex.echappe_caracteres(article.intitule_long),
-                        'cmj': Outils.format_2_dec(sco['sommes_cat_m'][article.code_d]),
-                        'crj': Outils.format_2_dec(sco['sommes_cat_r'][article.code_d]),
-                        'cj': Outils.format_2_dec(sco['tot_cat'][article.code_d])}
+        for id_article in artsap.ids_d3:
+            total += sco['tot_cat'][id_article]
+            if sco['sommes_cat_m'][id_article]:
+                article = artsap.donnees[id_article]
+                dico = {'intitule': Latex.echappe_caracteres(article['intitule_long']),
+                        'cmj': Outils.format_2_dec(sco['sommes_cat_m'][id_article]),
+                        'crj': Outils.format_2_dec(sco['sommes_cat_r'][id_article]),
+                        'cj': Outils.format_2_dec(sco['tot_cat'][id_article])}
                 contenu += r'''
                 %(intitule)s & %(cmj)s & %(crj)s & %(cj)s \\
                 \hline

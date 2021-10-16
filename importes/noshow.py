@@ -122,7 +122,7 @@ class NoShow(Fichier):
             id_groupe = machines.donnees[id_machine]['id_groupe']
             groupe = groupes.donnees[id_groupe]
 
-            nat = client['nature']
+            nat = client['id_classe']
             cat_hp = groupe['id_cat_hp']
             cat_hc = groupe['id_cat_hc']
             pu_hp = round(categprix.donnees[nat + cat_hp]['prix_unit'], 2)

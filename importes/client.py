@@ -8,7 +8,7 @@ class Client(Fichier):
     Classe pour l'importation des données de Clients Cmi
     """
 
-    cles = ['annee', 'mois', 'code', 'code_sap', 'abrev_labo', 'nom_labo', 'ref', 'dest', 'email', 'mode', 'nature']
+    cles = ['annee', 'mois', 'code', 'code_sap', 'abrev_labo', 'ref', 'dest', 'email', 'mode', 'id_classe']
     nom_fichier = "client.csv"
     libelle = "Clients"
 
@@ -27,10 +27,11 @@ class Client(Fichier):
             return []
         return self.codes
 
-    def est_coherent(self, generaux):
+    def est_coherent(self, generaux, classes):
         """
         vérifie que les données du fichier importé sont cohérentes, et efface les colonnes mois et année
         :param generaux: paramètres généraux
+        :param classes: classes clients importées
         :return: 1 s'il y a une erreur, 0 sinon
         """
         if self.verifie_date == 0:
@@ -61,25 +62,25 @@ class Client(Fichier):
 
             donnee['abrev_labo'], info = Outils.est_un_alphanumerique(donnee['abrev_labo'], "l'abrev. labo", ligne)
             msg += info
-            donnee['nom_labo'], info = Outils.est_un_texte(donnee['nom_labo'], "le nom labo", ligne, True)
-            msg += info
             donnee['ref'], info = Outils.est_un_texte(donnee['ref'], "la référence", ligne, True)
             msg += info
             donnee['dest'], info = Outils.est_un_texte(donnee['dest'], "le destinataire", ligne, True)
             msg += info
 
-            if donnee['nature'] == "":
+            if donnee['id_classe'] == "":
                 msg += "le type de labo de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif donnee['nature'] not in generaux.obtenir_code_n():
-                msg += "le type de labo '" + donnee['nature'] + "' de la ligne " + str(ligne) +\
-                    " n'existe pas dans les types N\n"
             else:
-                av_hc = generaux.avantage_hc_par_code_n(donnee['nature'])
-                donnee['rh'] = 1
-                donnee['bh'] = 0
-                if av_hc == 'BONUS':
-                    donnee['bh'] = 1
-                    donnee['rh'] = 0
+                classe = classes.contient_id(donnee['id_classe'])
+                if not classe:
+                    msg += "le type de labo '" + donnee['id_classe'] + "' de la ligne " + str(ligne) +\
+                        " n'existe pas dans les types N\n"
+                else:
+                    av_hc = classe['avantage_HC']
+                    donnee['rh'] = 1
+                    donnee['bh'] = 0
+                    if av_hc == 'BONUS':
+                        donnee['bh'] = 1
+                        donnee['rh'] = 0
 
             if (donnee['mode'] != "") and (donnee['mode'] not in generaux.obtenir_modes_envoi()):
                 msg += "le mode d'envoi '" + donnee['mode'] + "' de la ligne " + str(ligne) +\

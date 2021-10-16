@@ -28,7 +28,7 @@ class AnnexeSubsides(Recap):
             str(edition.version)
 
     def generer(self, trans_vals, grants, plafonds, paramtexte, paramannexe, par_client, comptes, clients, subsides,
-                generaux):
+                artsap):
         """
         génération des fichiers d'annexes subsides à partir des transactions
         :param trans_vals: valeurs des transactions générées
@@ -40,7 +40,7 @@ class AnnexeSubsides(Recap):
         :param comptes: comptes importés
         :param clients: clients importés
         :param subsides: subsides importés
-        :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         """
         for donnee in paramannexe.donnees:
             if donnee['nom'] == 'Annexe-détails':
@@ -87,16 +87,16 @@ class AnnexeSubsides(Recap):
                 compte = comptes.donnees[id_compte]
                 type_s = compte['type_subside']
                 subside = subsides.donnees[type_s]
-                for code_d in generaux.obtenir_code_d():
-                    plaf = type_s + code_d
+                for id_article in artsap.ids:
+                    plaf = type_s + id_article
                     if plaf in plafonds.donnees.keys():
                         plafond = plafonds.donnees[plaf]
                         donnee = [client['code'], client['abrev_labo'], compte['id_compte'], compte['intitule'],
-                                  compte['type_subside'], code_d, generaux.intitule_long_par_code_d(code_d),
+                                  compte['type_subside'], id_article, artsap.donnees[id_article]['intitule_long'],
                                   subside['intitule'], subside['debut'], subside['fin'], plafond['max_compte'],
                                   plafond['max_mois']]
                         subs = 0
-                        g_id = id_compte + code_d
+                        g_id = id_compte + id_article
                         if g_id in grants.donnees.keys():
                             grant, info = Outils.est_un_nombre(grants.donnees[g_id]['montant'], "le montant de grant",
                                                                min=0, arrondi=2)
@@ -106,8 +106,8 @@ class AnnexeSubsides(Recap):
                             grant = 0
                         if code in par_client and id_compte in par_client[code]['comptes']:
                             par_code = par_client[code]['comptes'][id_compte]
-                            if code_d in par_code.keys():
-                                tbtr = par_code[code_d]
+                            if id_article in par_code.keys():
+                                tbtr = par_code[id_article]
                                 for indice in tbtr:
                                     val, info = Outils.est_un_nombre(trans_vals[indice]['subsid-CHF'], "le subside CHF",
                                                                      arrondi=2)

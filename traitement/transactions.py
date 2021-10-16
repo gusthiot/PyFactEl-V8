@@ -7,15 +7,15 @@ class Transactions(Recap):
     Classe pour la création des transactions
     """
 
-    cles = ['invoice-year', 'invoice-month', 'invoice-ref', 'client-code', 'client-sap', 'client-name', 'client-class',
-            'client-labelclass', 'oper-id', 'oper-name', 'oper-note', 'staff-note', 'mach-id', 'mach-name', 'user-id',
-            'user-sciper', 'user-name', 'user-first', 'proj-id', 'proj-nbr', 'proj-name', 'proj-expl', 'proj-subs',
-            'item-id', 'item-type', 'item-nbr', 'item-name', 'item-unit', 'item-codeD', 'item-labelcode', 'item-sap',
-            'item-extra', 'platf-code', 'platf-op', 'platf-sap', 'platf-name', 'platf-cf', 'platf-fund', 'transac-date',
-            'transac-quantity', 'transac-usage', 'valuation-price', 'valuation-brut', 'discount-type', 'discount-CHF',
-            'valuation-net', 'subsid-code', 'subsid-name', 'subsid-start', 'subsid-end', 'subsid-ok', 'subsid-maxproj',
-            'subsid-maxmois', 'subsid-reste', 'subsid-CHF', 'deduct-CHF', 'subsid-deduct', 'total-fact',
-            'discount-bonus', 'subsid-bonus']
+    cles = ['invoice-year', 'invoice-month', 'invoice-ref', 'client-code', 'client-sap', 'client-name',
+            'client-idclass', 'client-class', 'client-labelclass', 'oper-id', 'oper-name', 'oper-note', 'staff-note',
+            'mach-id', 'mach-name', 'user-id', 'user-sciper', 'user-name', 'user-first', 'proj-id', 'proj-nbr',
+            'proj-name', 'proj-expl', 'proj-subs', 'item-id', 'item-type', 'item-nbr', 'item-name', 'item-unit',
+            'item-idsap', 'item-codeD', 'item-labelcode', 'item-sap', 'item-extra', 'platf-code', 'platf-op',
+            'platf-sap', 'platf-name', 'platf-cf', 'platf-fund', 'transac-date', 'transac-quantity', 'transac-usage',
+            'valuation-price', 'valuation-brut', 'discount-type', 'discount-CHF', 'valuation-net', 'subsid-code',
+            'subsid-name', 'subsid-start', 'subsid-end', 'subsid-ok', 'subsid-maxproj', 'subsid-maxmois',
+            'subsid-reste', 'subsid-CHF', 'deduct-CHF', 'subsid-deduct', 'total-fact', 'discount-bonus', 'subsid-bonus']
     
     def __init__(self, edition):
         """
@@ -32,7 +32,7 @@ class Transactions(Recap):
         self.comptabilises = {}
 
     def generer(self, acces, noshows, livraisons, prestations, machines, categprix, comptes, clients, users,
-                plateformes, generaux, articles, tarifs, subsides, plafonds, grants, groupes, cles, paramtexte):
+                plateformes, classes, articles, tarifs, subsides, plafonds, grants, groupes, cles, paramtexte):
         """
         génération du fichier des transactions
         :param acces: accès importés
@@ -45,7 +45,7 @@ class Transactions(Recap):
         :param clients: clients importés
         :param users: users importés
         :param plateformes: plateformes importées
-        :param generaux: paramètres généraux
+        :param classes: classes clients importées
         :param articles: articles générés
         :param tarifs: tarifs générés
         :param subsides: subsides importés
@@ -62,11 +62,12 @@ class Transactions(Recap):
         for entree in acces.donnees:
             compte = comptes.donnees[entree['id_compte']]
             client = clients.donnees[compte['code_client']]
-            code_n = client['nature']
+            id_classe = client['id_classe']
+            classe = classes.donnees[id_classe]
             id_machine = entree['id_machine']
             machine = machines.donnees[id_machine]
             groupe = groupes.donnees[machine['id_groupe']]
-            ref_client = self.ref_client(generaux, client)
+            ref_client = self.ref_client(classe, client)
             operateur = users.donnees[entree['id_op']]
             ope = [entree['id_op'], operateur['prenom'] + " " + operateur['nom'], entree['remarque_op'],
                    entree['remarque_staff'], id_machine, machine['nom']]
@@ -75,7 +76,7 @@ class Transactions(Recap):
             # K3 CAE-run #
             if entree['duree_machine_hp'] > 0 or entree['duree_machine_hc'] > 0:
                 article = articles.valeurs[groupe['id_cat_plat']]
-                tarif = tarifs.valeurs[code_n + groupe['id_cat_plat']]
+                tarif = tarifs.valeurs[id_classe + groupe['id_cat_plat']]
                 art = self.art_plate(article, plateformes, clients)
                 if article['platf-code'] == compte['code_client']:
                     usage = 0
@@ -95,7 +96,7 @@ class Transactions(Recap):
                 else:
                     usage = duree_hp
                 trans = [entree['date_login'], duree_hp, usage]
-                tarif = tarifs.valeurs[code_n + groupe['id_cat_mach']]
+                tarif = tarifs.valeurs[id_classe + groupe['id_cat_mach']]
                 prix = round(duree_hp * tarif['valuation-price'], 2)
                 val = [tarif['valuation-price'], prix, "", 0, prix]
                 self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
@@ -110,7 +111,7 @@ class Transactions(Recap):
                 else:
                     usage = duree_hc
                 trans = [entree['date_login'], duree_hc, usage]
-                tarif = tarifs.valeurs[code_n + groupe['id_cat_mach']]
+                tarif = tarifs.valeurs[id_classe + groupe['id_cat_mach']]
                 prix = round(duree_hc * tarif['valuation-price'], 2)
                 reduc = round(tarif['valuation-price'] * machine['tx_rabais_hc']/100 * duree_hc, 2)
                 val = [tarif['valuation-price'], prix, pt['discount-HC'] + " -" + str(machine['tx_rabais_hc']) + "%",
@@ -127,13 +128,13 @@ class Transactions(Recap):
                 else:
                     usage = duree_op
                 trans = [entree['date_login'], duree_op, usage]
-                tarif = tarifs.valeurs[code_n + groupe['id_cat_mo']]
+                tarif = tarifs.valeurs[id_classe + groupe['id_cat_mo']]
                 prix = round(duree_op * tarif['valuation-price'], 2)
                 val = [tarif['valuation-price'], prix, "", 0, prix]
                 self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
 
             # K4 CAE-Extra #
-            prix_extra = categprix.donnees[code_n + groupe['id_cat_cher']]['prix_unit']
+            prix_extra = categprix.donnees[id_classe + groupe['id_cat_cher']]['prix_unit']
             if prix_extra > 0:
                 article = articles.valeurs[groupe['id_cat_cher']]
                 duree = duree_hp + duree_hc
@@ -143,7 +144,7 @@ class Transactions(Recap):
                     usage = duree
                 trans = [entree['date_login'], duree, usage]
                 art = self.art_plate(article, plateformes, clients)
-                tarif = tarifs.valeurs[code_n + groupe['id_cat_cher']]
+                tarif = tarifs.valeurs[id_classe + groupe['id_cat_cher']]
                 prix = round(duree * tarif['valuation-price'], 2)
                 val = [tarif['valuation-price'], prix, "", 0, prix]
                 self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
@@ -151,19 +152,20 @@ class Transactions(Recap):
         for entree in noshows.donnees:
             compte = comptes.donnees[entree['id_compte']]
             client = clients.donnees[compte['code_client']]
-            code_n = client['nature']
-            ref_client = self.ref_client(generaux, client)
+            id_classe = client['id_classe']
+            classe = classes.donnees[id_classe]
+            ref_client = self.ref_client(classe, client)
             id_machine = entree['id_machine']
             machine = machines.donnees[id_machine]
             groupe = groupes.donnees[machine['id_groupe']]
             if entree['type'] == 'HP':
                 # K5 NoShow-HP #
                 article = articles.valeurs[groupe['id_cat_hp']]
-                tarif = tarifs.valeurs[code_n + groupe['id_cat_hp']]
+                tarif = tarifs.valeurs[id_classe + groupe['id_cat_hp']]
             else:
                 # K6 NoShow-HC #
                 article = articles.valeurs[groupe['id_cat_hc']]
-                tarif = tarifs.valeurs[code_n + groupe['id_cat_hc']]
+                tarif = tarifs.valeurs[id_classe + groupe['id_cat_hc']]
             ope = ["", "", "", "", id_machine, machine['nom']]
             art = self.art_plate(article, plateformes, clients)
             util_proj = self.util_proj(entree['id_user'], users, compte)
@@ -175,8 +177,9 @@ class Transactions(Recap):
         for entree in livraisons.donnees:
             compte = comptes.donnees[entree['id_compte']]
             client = clients.donnees[compte['code_client']]
-            code_n = client['nature']
-            ref_client = self.ref_client(generaux, client)
+            id_classe = client['id_classe']
+            classe = classes.donnees[id_classe]
+            ref_client = self.ref_client(classe, client)
             id_prestation = entree['id_prestation']
             prestation = prestations.donnees[id_prestation]
             operateur = users.donnees[entree['id_operateur']]
@@ -196,7 +199,7 @@ class Transactions(Recap):
                    pt['oper-PO'] + " " + str(entree['date_commande']), entree['remarque'], idm, nm]
             util_proj = self.util_proj(entree['id_user'], users, compte)
             trans = [entree['date_livraison'], entree['quantite'], 0]
-            tarif = tarifs.valeurs[code_n + id_prestation]
+            tarif = tarifs.valeurs[id_classe + id_prestation]
             if entree['rabais'] > 0:
                 discount = pt['discount-LVR']
             else:
@@ -212,12 +215,13 @@ class Transactions(Recap):
                 id_compte = transact['up'][4]
                 compte = comptes.donnees[id_compte]
                 article = articles.valeurs[transact['art'][0]]
-                code_n = transact['rc'][4]
+                id_classe = transact['rc'][4]
                 montant = transact['val'][4]
                 id_mach = transact['ope'][4]
                 date = transact['trans'][0]
-                subs = self.subsides(subsides, cles, plafonds, grants, compte, code_n, article, date, montant, id_mach)
-                if generaux.subsides_par_code_n(code_n) == "BONUS":
+                subs = self.subsides(subsides, cles, plafonds, grants, compte, id_classe, article, date, montant,
+                                     id_mach)
+                if classes.donnees[id_classe]['subsides'] == "BONUS":
                     ded_bon = transact['val'][3]
                     ded_rab = 0
                     sub_bon = subs[8]
@@ -237,19 +241,19 @@ class Transactions(Recap):
                 self.ajouter_valeur(donnee, i)
                 i = i + 1
 
-    def ref_client(self, generaux, client):
+    def ref_client(self, classe, client):
         """
         ajout de la référence et des valeurs issues du client
-        :param generaux: paramètres généraux
+        :param classe: classe de la transaction
         :param client: client de la transaction
         :return tableau contenant la référence et les valeurs du client
         """
-        code_ref = generaux.code_ref_par_code_n(client['nature'])
+        code_ref = classe['ref_fact']
         reference = code_ref + str(self.annee)[2:] + Outils.mois_string(self.mois) + "." + client['code']
         if self.version > 0:
             reference += "-" + str(self.version)
-        return [reference, client['code'], client['code_sap'], client['abrev_labo'], client['nature'],
-                generaux.intitule_n_par_code_n(client['nature'])]
+        return [reference, client['code'], client['code_sap'], client['abrev_labo'], client['id_classe'],
+                classe['code_n'], classe['intitule']]
 
     @staticmethod
     def util_proj(id_user, users, compte):
@@ -276,11 +280,11 @@ class Transactions(Recap):
         plateforme = plateformes.donnees[article['platf-code']]
         client = clients.donnees[plateforme['id_plateforme']]
         return [article['item-id'], article['item-type'], article['item-nbr'], article['item-name'],
-                article['item-unit'], article['item-codeD'], article['item-labelcode'], article['item-sap'],
-                article['item-extra'], article['platf-code'], plateforme['code_p'], client['code_sap'],
-                plateforme['intitule'], plateforme['centre'], plateforme['fonds']]
+                article['item-unit'], article['item-idsap'], article['item-codeD'], article['item-labelcode'],
+                article['item-sap'], article['item-extra'], article['platf-code'], plateforme['code_p'],
+                client['code_sap'], plateforme['intitule'], plateforme['centre'], plateforme['fonds']]
 
-    def subsides(self, subsides, cles, plafonds, grants, compte, code_n, article, date, montant, id_machine):
+    def subsides(self, subsides, cles, plafonds, grants, compte, id_classe, article, date, montant, id_machine):
         """
         ajout des valeurs issues des subsides
         :param subsides: subsides importés
@@ -288,7 +292,7 @@ class Transactions(Recap):
         :param plafonds: plafonds importés
         :param grants: grants importés
         :param compte: compte de la transaction
-        :param code_n: code N de la transaction
+        :param id_classe: id classe de la transaction
         :param article: article de la transaction
         :param date: date dela transaction
         :param montant: montant de la transaction
@@ -314,8 +318,8 @@ class Transactions(Recap):
                         if subside['fin'] == "NULL" or subside['fin'] >= date:
                             if type_s in cles.donnees.keys():
                                 dict_s = cles.donnees[type_s]
-                                if self.check_plateforme(dict_s, article['platf-code'], code_n, compte['code_client'],
-                                                         id_machine):
+                                if self.check_plateforme(dict_s, article['platf-code'], id_classe,
+                                                         compte['code_client'], id_machine):
                                     result[4] = "YES"
                                     cg_id = compte['id_compte'] + article['item-codeD']
                                     if cg_id in grants.donnees.keys():
@@ -341,31 +345,31 @@ class Transactions(Recap):
         return result
 
     @staticmethod
-    def check_plateforme(dict_s, plateforme, code_n, code_client, id_machine):
+    def check_plateforme(dict_s, plateforme, id_classe, code_client, id_machine):
         """
         vérifie si les clés subsides contiennent la plateforme, ou 0
         :param dict_s: dict pour le type
         :param plateforme: plateforme à vérifier
-        :param code_n: code_n à vérifier
+        :param id_classe: id_classe à vérifier
         :param code_client: code client à vérifier
         :param id_machine: machine à vérifier
 
         """
         if "0" in dict_s:
-            if Transactions.check_code_n(dict_s, "0", code_n, code_client, id_machine):
+            if Transactions.check_id_classe(dict_s, "0", id_classe, code_client, id_machine):
                 return True
         if plateforme in dict_s:
-            if Transactions.check_code_n(dict_s, plateforme, code_n, code_client, id_machine):
+            if Transactions.check_id_classe(dict_s, plateforme, id_classe, code_client, id_machine):
                 return True
         return False
 
     @staticmethod
-    def check_code_n(dict_s, plateforme, code_n, code_client, id_machine):
+    def check_id_classe(dict_s, plateforme, id_classe, code_client, id_machine):
         """
         vérifie si les clés subsides contiennent le code N, ou 0
         :param dict_s: dict pour le type
         :param plateforme: plateforme sélectionnée ou 0
-        :param code_n: code_n à vérifier
+        :param id_classe: id_classe à vérifier
         :param code_client: code client à vérifier
         :param id_machine: machine à vérifier
 
@@ -374,21 +378,21 @@ class Transactions(Recap):
         if "0" in dict_p:
             if Transactions.check_client(dict_p, "0", code_client, id_machine):
                 return True
-        if code_n in dict_p:
-            if Transactions.check_client(dict_p, code_n, code_client, id_machine):
+        if id_classe in dict_p:
+            if Transactions.check_client(dict_p, id_classe, code_client, id_machine):
                 return True
         return False
 
     @staticmethod
-    def check_client(dict_p, code_n, code_client, id_machine):
+    def check_client(dict_p, id_classe, code_client, id_machine):
         """
         vérifie si les clés subsides contiennent le code client, ou 0
         :param dict_p: dict pour la plateforme
-        :param code_n: code N sélectionné ou 0
+        :param id_classe: id classe sélectionné ou 0
         :param code_client: code client à vérifier
         :param id_machine: machine à vérifier
         """
-        dict_n = dict_p[code_n]
+        dict_n = dict_p[id_classe]
         if "0" in dict_n:
             if Transactions.check_machine(dict_n, "0", id_machine):
                 return True

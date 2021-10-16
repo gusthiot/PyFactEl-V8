@@ -130,10 +130,10 @@ class Livraison(Fichier):
             prestation = prestations.donnees[donnee['id_prestation']]
             no_prestation = prestation['no_prestation']
             client = clients.donnees[code_client]
-            coefprest = coefprests.donnees[client['nature'] + prestation['categorie']]
+            coefprest = coefprests.donnees[client['id_classe'] + prestation['id_article']]
             prix_unit_client = round(prestation['prix_unit'] * coefprest['coefficient'], 2)
             donnee['rabais_r'] = round(donnee['rabais'], 2)
-            categorie = prestation['categorie']
+            categorie = prestation['id_article']
 
             if code_client not in self.sommes:
                 self.sommes[code_client] = {}
@@ -190,7 +190,7 @@ class Livraison(Fichier):
         donnees_dico = {}
         for donnee in self.donnees:
             if (donnee['id_compte'] == id_compte) and (donnee['code_client'] == code_client):
-                categorie = prestations.donnees[donnee['id_prestation']]['categorie']
+                categorie = prestations.donnees[donnee['id_prestation']]['id_article']
                 if categorie not in donnees_dico:
                     donnees_dico[categorie] = []
                 liste = donnees_dico[categorie]

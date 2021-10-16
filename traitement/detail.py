@@ -33,17 +33,18 @@ class Detail(object):
                 fichier_writer.writerow(ligne)
 
     @staticmethod
-    def creation_lignes(edition, sommes, clients, generaux, acces, livraisons, comptes, categories):
+    def creation_lignes(edition, sommes, clients, artsap, acces, livraisons, comptes, categories, classes):
         """
         génération des lignes de données du détail
         :param edition: paramètres d'édition
         :param sommes: sommes calculées
         :param clients: clients importés
-        :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         :param acces: accès importés
         :param livraisons: livraisons importées
         :param comptes: comptes importés
         :param categories: catégories importées
+        :param classes: classes clients importées
         :return: lignes de données du détail
         """
         if sommes.calculees == 0:
@@ -60,7 +61,7 @@ class Detail(object):
                 sclo = sommes.sommes_comptes[code_client]
                 comptes_utilises = Outils.comptes_in_somme(sclo, comptes)
                 base_client = [edition.annee, edition.mois, code_client, client['code_sap'], client['abrev_labo'],
-                               'U', client['nature']]
+                               'U', classes.donnees[client['id_classe']]['code_n']]
 
                 for id_compte, num_compte in sorted(comptes_utilises.items(), key=lambda x: x[1]):
                     compte = comptes.donnees[id_compte]
@@ -77,11 +78,12 @@ class Detail(object):
                     if code_client in livraisons.sommes and id_compte in livraisons.sommes[code_client]:
                         somme = livraisons.sommes[code_client][id_compte]
 
-                        for article in generaux.articles_d3:
-                            if article.code_d in somme:
-                                for no_prestation, sip in sorted(somme[article.code_d].items()):
-                                    ligne = base_compte + [article.code_d, "", "", "", "", "", "", "", "",
-                                                           article.intitule_court, no_prestation, sip['nom'],
+                        for id_article in artsap.ids_d3:
+                            article = artsap.donnees[id_article]
+                            if id_article in somme:
+                                for no_prestation, sip in sorted(somme[id_article].items()):
+                                    ligne = base_compte + [id_article, "", "", "", "", "", "", "", "",
+                                                           article['intitule_court'], no_prestation, sip['nom'],
                                                            Outils.format_2_dec(sip['montantx']),
                                                            Outils.format_2_dec(sip['rabais']), "-", "-"]
                                     lignes.append(ligne)

@@ -7,7 +7,7 @@ class Prestation(Fichier):
     Classe pour l'importation des données de Prestations du catalogue
     """
 
-    cles = ['annee', 'mois', 'id_prestation', 'no_prestation', 'designation', 'categorie', 'unite_prest', 'prix_unit',
+    cles = ['annee', 'mois', 'id_prestation', 'no_prestation', 'designation', 'id_article', 'unite_prest', 'prix_unit',
             'id_plateforme', 'id_machine']
     nom_fichier = "prestation.csv"
     libelle = "Prestations"
@@ -46,10 +46,10 @@ class Prestation(Fichier):
                     return prestation
         return None
 
-    def est_coherent(self, generaux, coefprests, plateformes, machines):
+    def est_coherent(self, artsap, coefprests, plateformes, machines):
         """
         vérifie que les données du fichier importé sont cohérentes et efface les colonnes mois et année
-        :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         :param coefprests: coefficients prestations importés
         :param plateformes: plateformes importées
         :param machines: machines importées
@@ -92,13 +92,13 @@ class Prestation(Fichier):
             donnee['unite_prest'], info = Outils.est_un_texte(donnee['unite_prest'], "l'unité prestation", ligne, True)
             msg += info
 
-            if donnee['categorie'] == "":
-                msg += "la catégorie  de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif donnee['categorie'] not in generaux.codes_d3():
-                msg += "la catégorie '" + donnee['categorie'] + "' de la ligne " + str(ligne) +\
+            if donnee['id_article'] == "":
+                msg += "l'id article SAP  de la ligne " + str(ligne) + " ne peut être vide\n"
+            elif not artsap.contient_id(donnee['id_article'], ['lvr']):
+                msg += "l'id article SAP '" + donnee['id_article'] + "' de la ligne " + str(ligne) +\
                        " n'existe pas dans les paramètres D3\n"
-            elif coefprests.contient_categorie(donnee['categorie']) == 0:
-                msg += "la catégorie prestation '" + donnee['categorie'] + "' de la ligne " + str(ligne) +\
+            elif coefprests.contient_article(donnee['id_article']) == 0:
+                msg += "l'id article SAP' '" + donnee['id_article'] + "' de la ligne " + str(ligne) +\
                        " n'est pas référencée dans les coefficients\n"
 
             if donnee['id_plateforme'] == "":

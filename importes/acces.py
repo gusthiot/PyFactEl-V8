@@ -136,7 +136,7 @@ class Acces(Fichier):
             machine = machines.donnees[id_machine]
             groupe = groupes.donnees[machine['id_groupe']]
             client = clients.donnees[code_client]
-            prix_mach = categprix.donnees[client['nature'] + groupe['id_cat_mach']]['prix_unit']
+            prix_mach = categprix.donnees[client['id_classe'] + groupe['id_cat_mach']]['prix_unit']
 
             if code_client not in self.sommes:
                 self.sommes[code_client] = {'comptes': {}, 'machines': {}}
@@ -212,7 +212,7 @@ class Acces(Fichier):
                     cat_mo = groupe['id_cat_mo']
                     cat_plat = groupe['id_cat_plat']
                     cat_cher = groupe['id_cat_cher']
-                    nat = client['nature']
+                    nat = client['id_classe']
 
                     if cat_mach not in scat['machine']:
                         prix_mach = categprix.donnees[nat + cat_mach]['prix_unit']

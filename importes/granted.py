@@ -7,18 +7,18 @@ class Granted(Fichier):
     Classe pour l'importation des données de Subsides comptabilisés
     """
 
-    cles = ['id_compte', 'code_d', 'montant']
+    cles = ['id_compte', 'id_article', 'montant']
     libelle = "Subsides comptabilisés"
 
     def __init__(self, dossier_source, edition):
         self.nom_fichier = "granted_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois-1) + ".csv"
         super().__init__(dossier_source)
 
-    def est_coherent(self, comptes, generaux):
+    def est_coherent(self, comptes, artsap):
         """
         vérifie que les données du fichier importé sont cohérentes
         :param comptes: comptes importés
-        :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         :return: 1 s'il y a une erreur, 0 sinon
         """
 
@@ -38,22 +38,22 @@ class Granted(Fichier):
             elif comptes.contient_id(donnee['id_compte']) == 0:
                 msg += "l'id compte '" + donnee['id_compte'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
-            if donnee['code_d'] == "":
-                msg += "la code D de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif donnee['code_d'] not in generaux.obtenir_code_d():
-                msg += "la code D de la ligne " + str(ligne) + " n'existe pas dans les codes D\n"
+            if donnee['id_article'] == "":
+                msg += "l'id article SAP de la ligne " + str(ligne) + " ne peut être vide\n"
+            elif not artsap.contient_id(donnee['id_article']):
+                msg += "l'id article SAP de la ligne " + str(ligne) + " n'existe pas dans les codes D\n"
 
-            couple = [donnee['id_compte'], donnee['code_d']]
+            couple = [donnee['id_compte'], donnee['id_article']]
             if couple not in couples:
                 couples.append(couple)
             else:
-                msg += "Couple id compte '" + donnee['id_compte'] + "' et code D '" + \
-                       donnee['code_d'] + "' de la ligne " + str(ligne) + " pas unique\n"
+                msg += "Couple id compte '" + donnee['id_compte'] + "' et id article SAP '" + \
+                       donnee['id_article'] + "' de la ligne " + str(ligne) + " pas unique\n"
 
             donnee['montant'], info = Outils.est_un_nombre(donnee['montant'], "le montant comptabilisé", ligne, 2, 0)
             msg += info
 
-            donnees_dict[donnee['id_compte']+donnee['code_d']] = donnee
+            donnees_dict[donnee['id_compte']+donnee['id_article']] = donnee
             ligne += 1
 
         self.donnees = donnees_dict

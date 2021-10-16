@@ -25,7 +25,7 @@ class BilansTransacts(object):
         self.bil_conso = BilanConsos(edition)
         self.usr_lab = UserLabo(edition)
 
-    def generer(self, trans_vals, grants, plafonds, comptes, clients, subsides, paramtexte, paramannexe, generaux,
+    def generer(self, trans_vals, grants, plafonds, comptes, clients, subsides, paramtexte, paramannexe, artsap,
                 dossier_destination):
         """
         tri des transactions et génération des bilans
@@ -37,7 +37,7 @@ class BilansTransacts(object):
         :param subsides: subsides importés
         :param paramtexte: paramètres textuels
         :param paramannexe: paramètres d'annexe
-        :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         :param dossier_destination: Une instance de la classe dossier.DossierDestination
         """
         par_client = {}
@@ -47,7 +47,7 @@ class BilansTransacts(object):
             code_client = transaction['client-code']
             id_compte = transaction['proj-id']
             id_plateforme = transaction['platf-code']
-            code_d = transaction['item-codeD']
+            id_article = transaction['item-idsap']
             item = transaction['item-id']
             user_id = transaction['user-id']
             date, info = Outils.est_une_date(transaction['transac-date'], "la date de transaction")
@@ -68,10 +68,10 @@ class BilansTransacts(object):
                 if id_compte not in pcc.keys():
                     pcc[id_compte] = {}
                 pcd = pcc[id_compte]
-                if code_d not in pcd.keys():
-                    pcd[code_d] = [key]
+                if id_article not in pcd.keys():
+                    pcd[id_article] = [key]
                 else:
-                    pcd[code_d].append(key)
+                    pcd[id_article].append(key)
 
             if id_plateforme not in par_plate.keys():
                 par_plate[id_plateforme] = {'clients': {}, 'items': {}, 'users': {}}
@@ -80,10 +80,10 @@ class BilansTransacts(object):
             if code_client not in ppc.keys():
                 ppc[code_client] = {}
             ppd = ppc[code_client]
-            if code_d not in ppd.keys():
-                ppd[code_d] = [key]
+            if id_article not in ppd.keys():
+                ppd[id_article] = [key]
             else:
-                ppd[code_d].append(key)
+                ppd[id_article].append(key)
 
             ppi = par_plate[id_plateforme]['items']
             if item not in ppi.keys():
@@ -103,7 +103,7 @@ class BilansTransacts(object):
 
         self.ann_dets.generer(trans_vals, paramtexte, paramannexe, par_client)
         self.ann_subs.generer(trans_vals, grants, plafonds, paramtexte, paramannexe, par_client, comptes, clients,
-                              subsides, generaux)
+                              subsides, artsap)
         self.bil_plat.generer(trans_vals, paramtexte, dossier_destination, par_plate)
         self.bil_use.generer(trans_vals, paramtexte, dossier_destination, par_plate)
         self.bil_conso.generer(trans_vals, paramtexte, dossier_destination, par_plate)

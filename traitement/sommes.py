@@ -14,11 +14,12 @@ class Sommes(object):
     cles_somme_client = ['dht', 'somme_t_mm', 'somme_t_mr', 'somme_t_mb', 'mt', 'somme_t', 'nos', 'rm', 'rm_d', 'rr',
                          'r']
 
-    def __init__(self, verification, generaux):
+    def __init__(self, verification, generaux, artsap):
         """
         initialisation des sommes, et vérification si données utilisées correctes
         :param verification: pour vérifier si les dates et les cohérences sont correctes
         :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         """
 
         self.verification = verification
@@ -26,7 +27,7 @@ class Sommes(object):
         self.sco = 0
         self.sommes_clients = {}
         self.calculees = 0
-        self.categories = generaux.codes_d3()
+        self.categories = artsap.ids_d3
         self.min_fact_rese = generaux.min_fact_rese
 
     def calculer_toutes(self, livraisons, acces, clients, noshows):

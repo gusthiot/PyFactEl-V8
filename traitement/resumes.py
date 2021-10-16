@@ -54,11 +54,15 @@ class Resumes(object):
                 for ligne in maj[i]:
                     fichier_writer.writerow(ligne)
 
-        ticket_complet = "ticket_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois) + ".html"
-        section = list(f_html_sections.values())[0]
-        nom_client = clients.donnees[edition.client_unique]['abrev_labo'] + " (" + edition.client_unique + ")"
-        Resumes.maj_ticket(dossier_source, dossier_destination, ticket_complet, section, edition.client_unique,
-                           nom_client)
+        if len(f_html_sections) > 0:
+            ticket_complet = "ticket_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois) + ".html"
+            section = list(f_html_sections.values())[0]
+            nom_client = clients.donnees[edition.client_unique]['abrev_labo'] + " (" + edition.client_unique + ")"
+            Resumes.maj_ticket(dossier_source, dossier_destination, ticket_complet, section, edition.client_unique,
+                               nom_client)
+        else:
+            Resumes.supprimer_ticket(edition.client_unique, edition.mois, edition.annee, dossier_source,
+                                     dossier_destination)
 
     @staticmethod
     def maj_ticket(dossier_source, dossier_destination, nom_fichier, section, code, nom_client):
@@ -142,7 +146,18 @@ class Resumes(object):
             with dossier_destination.writer(fichier_complet) as fichier_writer:
                 for ligne in donnees_csv:
                     fichier_writer.writerow(ligne)
+        Resumes.supprimer_ticket(client_unique, mois, annee, dossier_source, dossier_destination)
 
+    @staticmethod
+    def supprimer_ticket(client_unique, mois, annee, dossier_source, dossier_destination):
+        """
+        suppression des résumés mensuels au niveau du client
+        :param client_unique: client concerné
+        :param mois: mois concerné
+        :param annee: année concernée
+        :param dossier_source: Une instance de la classe dossier.DossierSource
+        :param dossier_destination: Une instance de la classe dossier.DossierDestination
+        """
         ticket_complet = "ticket_" + str(annee) + "_" + Outils.mois_string(mois) + ".html"
         ticket_texte = dossier_source.string_lire(ticket_complet)
         index1, index2 = Resumes.section_position(ticket_texte, client_unique)

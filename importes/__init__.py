@@ -17,3 +17,5 @@ from .plafsubside import PlafSubside
 from .granted import Granted
 from .groupe import Groupe
 from .clesubside import CleSubside
+from .article_sap import ArticleSap
+from .classe_client import ClasseClient

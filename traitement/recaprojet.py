@@ -25,7 +25,8 @@ class RecaProjet(object):
                 fichier_writer.writerow(ligne)
 
     @staticmethod
-    def creation_lignes(edition, somme_client, client, generaux, acces, livraisons, comptes, categories):
+    def creation_lignes(edition, somme_client, client, generaux, acces, livraisons, comptes, categories, artsap,
+                        classes):
         """
         génération des lignes de données du récapitulatif
         :param edition: paramètres d'édition
@@ -36,6 +37,8 @@ class RecaProjet(object):
         :param livraisons: livraisons importées
         :param comptes: comptes importés
         :param categories: catégories importées
+        :param artsap: articles SAP importés
+        :param classes: classes clients importées
         :return: lignes de données du récapitulatif
         """
 
@@ -43,8 +46,8 @@ class RecaProjet(object):
 
         code_client = client['code']
         comptes_utilises = Outils.comptes_in_somme(somme_client, comptes)
-        nature = generaux.code_ref_par_code_n(client['nature'])
-        ref = nature + str(edition.annee)[2:] + Outils.mois_string(edition.mois) + "." + code_client
+        ref_fact = classes.donnees[client['id_classe']]['ref_fact']
+        ref = ref_fact + str(edition.annee)[2:] + Outils.mois_string(edition.mois) + "." + code_client
         if edition.version > 0:
             ref += "-" + str(edition.version)
         base_client = [generaux.centre, edition.annee, edition.mois, ref, client['code_sap'], client['abrev_labo']]
@@ -71,13 +74,13 @@ class RecaProjet(object):
             if code_client in livraisons.sommes and id_compte in livraisons.sommes[code_client]:
                 somme = livraisons.sommes[code_client][id_compte]
 
-                for article in generaux.articles_d3:
-                    if article.code_d in somme:
-                        if article.code_d == 'C':
+                for id_article in artsap.ids_d3:
+                    if id_article in somme:
+                        if id_article == 'C':
                             base_article = base_compte + ['Consumables']
                         else:
                             base_article = base_compte + ['Other']
-                        for no_prestation, sip in sorted(somme[article.code_d].items()):
+                        for no_prestation, sip in sorted(somme[id_article].items()):
                             if sip['montant'] > 0:
                                 ligne = base_article + [str(no_prestation) + " - " + sip['nom'], sip['quantite'],
                                                         sip['unite'], sip['pn'], (sip['montant'] - sip['rabais'])]

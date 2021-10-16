@@ -8,19 +8,19 @@ class CleSubside(Fichier):
     """
 
     nom_fichier = "clesubside.csv"
-    cles = ['type', 'id_plateforme', 'code_n', 'code_client', 'id_machine']
+    cles = ['type', 'id_plateforme', 'id_classe', 'code_client', 'id_machine']
     libelle = "Clés Subsides"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def est_coherent(self, plateformes, clients, machines, generaux, subsides):
+    def est_coherent(self, plateformes, clients, machines, classes, subsides):
         """
         vérifie que les données du fichier importé sont cohérentes
         :param plateformes: plateformes importées
         :param clients: clients importés
         :param machines: machines importées
-        :param generaux: paramètres généraux
+        :param classes: classes clients importées
         :param subsides: subsides importés
         :return: 1 s'il y a une erreur, 0 sinon
         """
@@ -47,8 +47,8 @@ class CleSubside(Fichier):
                 msg += "l'id plateforme '" + donnee['id_plateforme'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
 
-            if donnee['code_n'] != "0" and donnee['code_n'] not in generaux.obtenir_code_n():
-                msg += "la code N de la ligne " + str(ligne) + " n'existe pas dans les codes N\n"
+            if donnee['id_classe'] != "0" and not classes.contient_id(donnee['id_classe']):
+                msg += "l'id classe client de la ligne " + str(ligne) + " n'existe pas\n"
 
             if donnee['code_client'] != "0" and donnee['code_client'] not in clients.donnees:
                 msg += "le code client " + donnee['code_client'] + " de la ligne " + str(ligne) + \
@@ -58,7 +58,7 @@ class CleSubside(Fichier):
                 msg += "le machine id '" + donnee['id_machine'] + "' de la ligne " + str(ligne)\
                        + " n'est pas référencé\n"
 
-            quintuplet = donnee['type'] + donnee['id_plateforme'] + donnee['code_n'] + donnee['code_client'] + \
+            quintuplet = donnee['type'] + donnee['id_plateforme'] + donnee['id_classe'] + donnee['code_client'] + \
                 donnee['id_machine']
 
             if quintuplet not in quintuplets:
@@ -73,9 +73,9 @@ class CleSubside(Fichier):
             if donnee['id_plateforme'] not in dict_t:
                 dict_t[donnee['id_plateforme']] = {}
             dict_p = dict_t[donnee['id_plateforme']]
-            if donnee['code_n'] not in dict_p:
-                dict_p[donnee['code_n']] = {}
-            dict_n = dict_p[donnee['code_n']]
+            if donnee['id_classe'] not in dict_p:
+                dict_p[donnee['id_classe']] = {}
+            dict_n = dict_p[donnee['id_classe']]
             if donnee['code_client'] not in dict_n:
                 dict_n[donnee['code_client']] = {}
             dict_c = dict_n[donnee['code_client']]

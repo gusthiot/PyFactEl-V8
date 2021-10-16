@@ -7,8 +7,8 @@ class Articles(Recap):
     Classe pour la création du listing des articles
     """
 
-    cles = ['invoice-year', 'invoice-month', 'item-id', 'item-type', 'item-nbr', 'item-name', 'item-unit', 'item-codeD',
-            'item-labelcode', 'item-sap', 'platf-code', 'item-extra']
+    cles = ['invoice-year', 'invoice-month', 'item-id', 'item-type', 'item-nbr', 'item-name', 'item-unit', 'item-idsap',
+            'item-codeD', 'item-labelcode', 'item-sap', 'platf-code', 'item-extra']
 
     def __init__(self, edition):
         """
@@ -18,10 +18,10 @@ class Articles(Recap):
         super().__init__(edition)
         self.nom = "article_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois) + ".csv"
 
-    def generer(self, generaux, categories, prestations, paramtexte):
+    def generer(self, artsap, categories, prestations, paramtexte):
         """
         génération du fichier des articles
-        :param generaux: paramètres généraux
+        :param artsap: articles SAP importés
         :param categories: catégories importées
         :param prestations: prestations importées
         :param paramtexte: paramètres textuels
@@ -29,25 +29,26 @@ class Articles(Recap):
         pt = paramtexte.donnees
         for key in categories.donnees.keys():
             cat = categories.donnees[key]
-            if cat['code_d'] == generaux.obtenir_code_d()[0]:
-                type = pt['item-penalty']
-            elif cat['code_d'] == generaux.obtenir_code_d()[1]:
-                type = pt['item-service']
+            art = artsap.donnees[cat['id_article']]
+            if cat['id_article'] == artsap.id_d1:
+                genre = pt['item-penalty']
+            elif cat['id_article'] == artsap.id_d2:
+                genre = pt['item-service']
             else:
-                type = ""
+                genre = ""
                 Outils.fatal("Erreur code D", "Une catégorie devrait avoir un code D1 ou D2")
-            donnee = [cat['id_categorie'], type, cat['no_categorie'], cat['intitule'], cat['unite'],
-                      cat['code_d'], generaux.intitule_long_par_code_d(cat['code_d']),
-                      generaux.code_sap_par_code_d(cat['code_d']), cat['id_plateforme'], "FALSE"]
+            donnee = [cat['id_categorie'], genre, cat['no_categorie'], cat['intitule'], cat['unite'], cat['id_article'],
+                      art['code_d'], art['intitule_long'], art['code_sap'], cat['id_plateforme'], "FALSE"]
             self.ajouter_valeur(donnee, cat['id_categorie'])
 
         for key in prestations.donnees.keys():
             prest = prestations.donnees[key]
+            art = artsap.donnees[prest['id_article']]
             if prest['id_machine'] == "0":
                 extra = "FALSE"
             else:
                 extra = "TRUE"
             donnee = [prest['id_prestation'], pt['item-good'], prest['no_prestation'], prest['designation'],
-                      prest['unite_prest'], prest['categorie'], generaux.intitule_long_par_code_d(prest['categorie']),
-                      generaux.code_sap_par_code_d(prest['categorie']), prest['id_plateforme'], extra]
+                      prest['unite_prest'], prest['id_article'], art['code_d'], art['intitule_long'],
+                      art['code_sap'], prest['id_plateforme'], extra]
             self.ajouter_valeur(donnee, prest['id_prestation'])

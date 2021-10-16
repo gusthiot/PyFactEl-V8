@@ -41,7 +41,7 @@ class Verification(object):
 
     def verification_coherence(self, generaux, edition, acces, categories, categprix, clients, coefprests, comptes,
                                grants, livraisons, machines, noshows, plafonds, plateformes, prestations, subsides,
-                               users, docpdf, groupes, cles):
+                               users, docpdf, groupes, cles, classes, artsap):
         """
         vérifie la cohérence des données importées
         :param generaux: paramètres généraux
@@ -64,26 +64,30 @@ class Verification(object):
         :param docpdf: paramètres d'ajout de document pdf
         :param groupes: groupes importés
         :param cles: clés subsides importées
+        :param classes: classes clients importées
+        :param artsap: articles sap importés
         :return: 0 si ok, sinon le nombre d'échecs à la vérification
         """
         verif = 0
-        verif += clients.est_coherent(generaux)
+        verif += artsap.est_coherent()
+        verif += classes.est_coherent()
+        verif += clients.est_coherent(generaux, classes)
         verif += generaux.est_coherent(clients)
         verif += edition.est_coherent(clients)
-        verif += docpdf.est_coherent(generaux, clients)
+        verif += docpdf.est_coherent(classes, clients)
         verif += users.est_coherent()
         verif += plateformes.est_coherent(clients)
-        verif += categories.est_coherent(generaux, plateformes)
+        verif += categories.est_coherent(artsap, plateformes)
         verif += groupes.est_coherent(categories)
         verif += machines.est_coherent(groupes)
-        verif += categprix.est_coherent(generaux, categories)
-        verif += coefprests.est_coherent(generaux)
-        verif += prestations.est_coherent(generaux, coefprests, plateformes, machines)
+        verif += categprix.est_coherent(classes, categories)
+        verif += coefprests.est_coherent(classes, artsap)
+        verif += prestations.est_coherent(artsap, coefprests, plateformes, machines)
         verif += subsides.est_coherent()
-        verif += plafonds.est_coherent(subsides, generaux)
-        verif += cles.est_coherent(plateformes, clients, machines, generaux, subsides)
+        verif += plafonds.est_coherent(subsides, artsap)
+        verif += cles.est_coherent(plateformes, clients, machines, classes, subsides)
         verif += comptes.est_coherent(clients, subsides)
-        verif += grants.est_coherent(comptes, generaux)
+        verif += grants.est_coherent(comptes, artsap)
         verif += acces.est_coherent(comptes, machines, users)
         verif += noshows.est_coherent(comptes, machines, users)
         verif += livraisons.est_coherent(comptes, prestations, users)

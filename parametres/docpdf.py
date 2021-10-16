@@ -8,7 +8,7 @@ class DocPdf(object):
     """
 
     nom_fichier = "docpdf.csv"
-    cles = ['nom', 'position', 'Annexe-pièces', 'Annexe-interne', 'nature', 'code']
+    cles = ['nom', 'position', 'Annexe-pièces', 'Annexe-interne', 'id_classe', 'code']
     libelle = "Documents PDF"
 
     def __init__(self, dossier_source):
@@ -60,7 +60,7 @@ class DocPdf(object):
         for donnee in self.donnees:
             if donnee['code'] != "" and donnee['code'] != client['code']:
                 continue
-            if donnee['nature'] != "" and donnee['nature'] != client['nature']:
+            if donnee['id_classe'] != "" and donnee['id_classe'] != client['id_classe']:
                 continue
             if donnee[type_annexe] == 'NON':
                 continue
@@ -70,10 +70,10 @@ class DocPdf(object):
                 pdfs[donnee['position']].append({'chemin': donnee['chemin'], 'nom': donnee['nom']})
         return pdfs
 
-    def est_coherent(self, generaux, clients):
+    def est_coherent(self, classes, clients):
         """
         vérifie que les données du fichier importé sont cohérentes
-        :param generaux: paramètres généraux
+        :param classes: classes clients importées
         :param clients: clients importés
         :return: 1 s'il y a une erreur, 0 sinon
         """
@@ -106,9 +106,9 @@ class DocPdf(object):
             if not (donnee['Annexe-interne'] == "OUI" or donnee['Annexe-interne'] == "NON"):
                 msg += "le annexe Int de la ligne " + str(ligne) + " doit être 'OUI' ou 'NON'\n"
 
-            if donnee['nature'] != "" and donnee['nature'] not in generaux.obtenir_code_n():
-                msg += "la nature '" + donnee['nature'] + "' de la ligne " + str(ligne) +\
-                    " n'existe pas dans les types N\n"
+            if donnee['id_classe'] != "" and not classes.contient_id(donnee['id_classe']):
+                msg += "l'id classe '" + donnee['id_classe'] + "' de la ligne " + str(ligne) +\
+                    " n'existe pas dans les ids de classe\n"
 
             if donnee['code'] != "" and donnee['code'] not in clients.obtenir_codes():
                 msg += "le code client '" + donnee['code'] + "' de la ligne " + str(ligne) + " n'est pas référencé\n"
