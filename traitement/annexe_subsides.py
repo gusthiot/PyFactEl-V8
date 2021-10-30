@@ -9,9 +9,9 @@ class AnnexeSubsides(Recap):
     Classe pour la création du csv d'annexe subsides
     """
 
-    cles = ['invoice-year', 'invoice-month', 'client-code', 'client-name', 'proj-id', 'proj-name', 'proj-subs',
-            'item-codeD', 'item-labelcode', 'subsid-name', 'subsid-start', 'subsid-end', 'subsid-maxproj',
-            'subsid-maxmois', 'subsid-alrdygrant', 'subsid-CHF', 'subsid-reste']
+    cles = ['invoice-year', 'invoice-month', 'client-code', 'client-name', 'proj-id', 'proj-name', 'item-codeD',
+            'item-labelcode', 'subsid-code', 'subsid-name', 'subsid-start', 'subsid-end', 'subsid-pourcent',
+            'subsid-maxproj', 'subsid-maxmois', 'subsid-alrdygrant', 'subsid-CHF', 'subsid-reste']
 
     def __init__(self, edition):
         """
@@ -92,9 +92,9 @@ class AnnexeSubsides(Recap):
                     if plaf in plafonds.donnees.keys():
                         plafond = plafonds.donnees[plaf]
                         donnee = [client['code'], client['abrev_labo'], compte['id_compte'], compte['intitule'],
-                                  compte['type_subside'], id_article, artsap.donnees[id_article]['intitule_long'],
-                                  subside['intitule'], subside['debut'], subside['fin'], plafond['max_compte'],
-                                  plafond['max_mois']]
+                                  id_article, artsap.donnees[id_article]['intitule_long'], subside['type'],
+                                  subside['intitule'], subside['debut'], subside['fin'], plafond['pourcentage'],
+                                  plafond['max_compte'], plafond['max_mois']]
                         subs = 0
                         g_id = id_compte + id_article
                         if g_id in grants.donnees.keys():

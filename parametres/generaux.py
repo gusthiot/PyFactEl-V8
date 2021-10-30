@@ -9,9 +9,8 @@ class Generaux(object):
 
     nom_fichier = "paramgen.csv"
     libelle = "Paramètres Généraux"
-    cles = ['centre', 'code_cfact_centre', 'origine', 'code_int', 'code_ext', 'commerciale', 'canal', 'secteur',
-            'devise', 'financier', 'fonds', 'entete', 'poste_reservation', 'lien', 'chemin', 'chemin_propre',
-            'chemin_filigrane', 'modes', 'min_fact_rese']
+    cles = ['centre', 'origine', 'code_int', 'code_ext', 'commerciale', 'canal', 'secteur', 'devise', 'financier',
+            'fonds', 'poste_reservation', 'lien', 'chemin', 'chemin_filigrane', 'modes', 'min_fact_rese']
 
     def __init__(self, dossier_source):
         """
@@ -20,7 +19,6 @@ class Generaux(object):
         :param dossier_source: Une instance de la classe dossier.DossierSource
         """
         self._donnees = {}
-        self.verifie_coherence = 0
         try:
             for ligne in dossier_source.reader(self.nom_fichier):
                 cle = ligne.pop(0)
@@ -58,17 +56,12 @@ class Generaux(object):
         erreurs += err
         self._donnees['fonds'][1], err = Outils.est_un_alphanumerique(self._donnees['fonds'][1], "le fonds")
         erreurs += err
-        self._donnees['entete'][1], err = Outils.est_un_texte(self._donnees['entete'][1], "l'entête", vide=True)
-        erreurs += err
         self._donnees['poste_reservation'][1], err = Outils.est_un_entier(self._donnees['poste_reservation'][1],
                                                                           "le poste réservation", min=1, max=9)
         erreurs += err
         self._donnees['lien'][1], err = Outils.est_un_chemin(self._donnees['lien'][1], "le lien")
         erreurs += err
         self._donnees['chemin'][1], err = Outils.est_un_chemin(self._donnees['chemin'][1], "le chemin")
-        erreurs += err
-        self._donnees['chemin_propre'][1], err = Outils.est_un_chemin(self._donnees['chemin_propre'][1],
-                                                                      "le chemin propre")
         erreurs += err
         self._donnees['chemin_filigrane'][1], err = Outils.est_un_chemin(self._donnees['chemin_filigrane'][1],
                                                                          "le chemin filigrane")
@@ -86,27 +79,6 @@ class Generaux(object):
 
         if erreurs != "":
             Outils.fatal(ErreurConsistance(), self.libelle + "\n" + erreurs)
-
-    def est_coherent(self, clients):
-        """
-        vérifie que les données du fichier importé sont cohérentes
-        :param clients: clients importés
-        :return: 1 s'il y a une erreur, 0 sinon
-        """
-
-        if self.verifie_coherence == 1:
-            print(self.libelle + ": cohérence déjà vérifiée")
-            return 0
-
-        self.verifie_coherence = 1
-        if self._donnees['code_cfact_centre'][1] == "":
-            Outils.affiche_message(self.libelle + "\n" + "le code client du centre de facturation ne peut être vide\n")
-            return 1
-        elif self._donnees['code_cfact_centre'][1] not in clients.donnees:
-            Outils.affiche_message(self.libelle + "\n" + "le code client du centre de facturation " +
-                                   self._donnees['code_cfact_centre'][1] + " n'est pas référencé\n")
-            return 1
-        return 0
 
     def obtenir_modes_envoi(self):
         """
@@ -127,7 +99,6 @@ def ajoute_accesseur_pour_valeur_unique(cls, nom, cle_csv=None):
 
 ajoute_accesseur_pour_valeur_unique(Generaux, "centre_financier", "financier")
 
-for champ_valeur_unique in ('fonds', 'entete', 'chemin', 'lien', 'min_fact_rese', 'devise', 'canal', 'secteur',
-                            'origine', 'commerciale', 'poste_reservation', 'code_int', 'code_ext', 'centre',
-                            'code_cfact_centre', 'chemin_propre', 'chemin_filigrane'):
+for champ_valeur_unique in ('fonds', 'chemin', 'lien', 'min_fact_rese', 'devise', 'canal', 'secteur', 'origine',
+                            'commerciale', 'poste_reservation', 'code_int', 'code_ext', 'centre', 'chemin_filigrane'):
     ajoute_accesseur_pour_valeur_unique(Generaux, champ_valeur_unique)

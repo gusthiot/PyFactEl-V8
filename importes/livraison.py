@@ -8,7 +8,7 @@ class Livraison(Fichier):
     """
 
     cles = ['annee', 'mois', 'id_compte', 'id_user', 'id_prestation', 'date_livraison', 'quantite', 'rabais',
-            'id_operateur', 'id_livraison', 'date_commande', 'date_prise', 'remarque']
+            'id_operateur', 'id_livraison', 'date_commande', 'remarque']
     nom_fichier = "lvr.csv"
     libelle = "Livraison Prestations"
 
@@ -80,11 +80,10 @@ class Livraison(Fichier):
             donnee['rabais'], info = Outils.est_un_nombre(donnee['rabais'], "le rabais", ligne, 2, 0)
             msg += info
 
-            donnee['date_livraison'], info = Outils.est_une_date(donnee['date_livraison'], "la date de livraison", ligne)
+            donnee['date_livraison'], info = Outils.est_une_date(donnee['date_livraison'], "la date de livraison",
+                                                                 ligne)
             msg += info
             donnee['date_commande'], info = Outils.est_une_date(donnee['date_commande'], "la date de commande", ligne)
-            msg += info
-            donnee['date_prise'], info = Outils.est_une_date(donnee['date_prise'], "la date de prise", ligne, True)
             msg += info
 
             donnee['id_livraison'], info = Outils.est_un_texte(donnee['id_livraison'], "l'id livraison", ligne)

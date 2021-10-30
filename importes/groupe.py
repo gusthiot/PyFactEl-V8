@@ -8,7 +8,8 @@ class Groupe(Fichier):
     """
 
     # K1, K2, K3, K4, K5, K5, K6
-    cles = ['id_groupe', 'id_cat_mach', 'id_cat_mo', 'id_cat_plat', 'id_cat_cher', 'id_cat_hp', 'id_cat_hc']
+    cles = ['id_groupe', 'id_cat_mach', 'id_cat_mo', 'id_cat_plat', 'id_cat_cher', 'id_cat_hp', 'id_cat_hc',
+            'id_cat_fixe']
     nom_fichier = "groupe.csv"
     libelle = "Groupes de machines"
 
@@ -91,6 +92,12 @@ class Groupe(Fichier):
                 msg += "l'id catégorie hc de la ligne " + str(ligne) + " ne peut être vide\n"
             elif categories.contient_id(donnee['id_cat_hc']) == 0:
                 msg += "l'id catégorie hc '" + donnee['id_cat_hc'] + "' de la ligne " + str(ligne) \
+                       + " n'est pas référencé\n"
+
+            if donnee['id_cat_fixe'] == "":
+                msg += "l'id catégorie fixe de la ligne " + str(ligne) + " ne peut être vide\n"
+            elif categories.contient_id(donnee['id_cat_fixe']) == 0:
+                msg += "l'id catégorie fixe '" + donnee['id_cat_fixe'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
 
             donnees_dict[donnee['id_groupe']] = donnee

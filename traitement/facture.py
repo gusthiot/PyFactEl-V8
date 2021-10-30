@@ -80,15 +80,15 @@ class Facture(object):
                 code_sap_traduit = self.prod2qual.traduire_code_client(code_sap)
             else:
                 code_sap_traduit = code_sap
-            dico_contenu = {'code': code_client, 'abrev': client['abrev_labo'], 'dest': client['dest'],
-                            'ref': client['ref'], 'ref_fact': reference, 'texte': generaux.entete}
+            dico_contenu = {'code': code_client, 'abrev': client['abrev_labo'], 'nom2': client['nom2'],
+                            'nom3': client['nom3'], 'ref': client['ref'], 'ref_fact': reference}
             contenu_client = r'''<section id="%(code)s"><div id="entete"> %(code)s <br />
                 %(abrev)s <br />
-                %(dest)s <br />
+                %(nom2)s <br />
+                %(nom3)s <br />
                 %(ref)s <br />
                 </div><br />
                 %(ref_fact)s <br /><br />
-                %(texte)s <br />
                 ''' % dico_contenu
 
             contenu_client += r'''<table id="tableau">
@@ -99,9 +99,9 @@ class Facture(object):
                 '''
 
             ligne = [poste, generaux.origine, genre, generaux.commerciale, generaux.canal, generaux.secteur, "", "",
-                     code_sap_traduit, client['dest'], client['ref'], client['email'], code_sap_traduit,
+                     code_sap_traduit, client['nom2'], client['nom3'], client['email'], code_sap_traduit,
                      code_sap_traduit, code_sap_traduit, generaux.devise, client['mode'], reference, "", "",
-                     generaux.entete]
+                     client['ref']]
             for donnee in paramannexe.donnees:
                 nom_annexe = donnee['nom'] + "_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois) + \
                              "_" + str(edition.version) + "_" + code_client + ".pdf"

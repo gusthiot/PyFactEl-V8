@@ -72,7 +72,6 @@ class Verification(object):
         verif += artsap.est_coherent()
         verif += classes.est_coherent()
         verif += clients.est_coherent(generaux, classes)
-        verif += generaux.est_coherent(clients)
         verif += edition.est_coherent(clients)
         verif += docpdf.est_coherent(classes, clients)
         verif += users.est_coherent()

@@ -8,7 +8,7 @@ class PlafSubside(Fichier):
     """
 
     nom_fichier = "plafsubside.csv"
-    cles = ['type', 'id_article', 'max_mois', 'max_compte']
+    cles = ['type', 'id_article', 'pourcentage', 'max_mois', 'max_compte']
     libelle = "Plafonds Subsides"
 
     def __init__(self, *args, **kwargs):
@@ -49,6 +49,10 @@ class PlafSubside(Fichier):
             else:
                 msg += "Couple type '" + donnee['type'] + "' et id article SAP '" + \
                        donnee['id_article'] + "' de la ligne " + str(ligne) + " pas unique\n"
+
+            donnee['pourcentage'], info = Outils.est_un_nombre(donnee['pourcentage'], "le pourcentage", ligne, 2, 0,
+                                                               100)
+            msg += info
 
             donnee['max_mois'], info = Outils.est_un_nombre(donnee['max_mois'], "le max mensuel", ligne, 2, 0)
             msg += info

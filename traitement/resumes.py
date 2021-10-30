@@ -6,8 +6,8 @@ class Resumes(object):
     Classe pour la création et la modification des résumés statistiques mensuels
     """
 
-    fichiers = ["bilan", "bilan-comptes", "detail", "cae", "lvr", "noshow"]
-    positions = [3, 3, 2, 7, 7, 14]
+    fichiers = ["bilan"]
+    positions = [3]
 
     @staticmethod
     def base(edition, dossier_source, dossier_destination):
@@ -117,38 +117,6 @@ class Resumes(object):
                                 dossier_destination.string_ecrire(nom_fichier, texte)
 
     @staticmethod
-    def suppression(suppression, dossier_source, dossier_destination):
-        """
-        suppression des résumés mensuels au niveau du client dont la facture est supprimée
-        :param suppression: paramètres de suppression
-        :param dossier_source: Une instance de la classe dossier.DossierSource
-        :param dossier_destination: Une instance de la classe dossier.DossierDestination
-        """
-
-        Resumes.supprimer(suppression.client_unique, suppression.mois, suppression.annee, dossier_source,
-                          dossier_destination)
-
-    @staticmethod
-    def supprimer(client_unique, mois, annee, dossier_source, dossier_destination):
-        """
-        suppression des résumés mensuels au niveau du client
-        :param client_unique: client concerné
-        :param mois: mois concerné
-        :param annee: année concernée
-        :param dossier_source: Une instance de la classe dossier.DossierSource
-        :param dossier_destination: Une instance de la classe dossier.DossierDestination
-        """
-
-        for i in range(len(Resumes.fichiers)):
-            fichier_complet = Resumes.fichiers[i] + "_" + str(annee) + "_" + Outils.mois_string(mois) + ".csv"
-            donnees_csv = Resumes.ouvrir_csv_sans_client(
-                dossier_source, fichier_complet, client_unique, Resumes.positions[i])
-            with dossier_destination.writer(fichier_complet) as fichier_writer:
-                for ligne in donnees_csv:
-                    fichier_writer.writerow(ligne)
-        Resumes.supprimer_ticket(client_unique, mois, annee, dossier_source, dossier_destination)
-
-    @staticmethod
     def supprimer_ticket(client_unique, mois, annee, dossier_source, dossier_destination):
         """
         suppression des résumés mensuels au niveau du client
@@ -178,87 +146,6 @@ class Resumes(object):
             texte = ticket_texte[:index1] + nouveau_select + ticket_texte[index2:]
             texte = texte.replace("..", ".")
             dossier_destination.string_ecrire(ticket_complet, texte)
-
-    @staticmethod
-    def annulation_suppression(annulsuppr, dossier_source, dossier_destination, dossier_source_backup):
-        """
-        annulation de modification des résumés mensuels au niveau du client dont la facture est supprimée
-        :param annulsuppr: paramètres d'annulation de suppression
-        :param dossier_source: Une instance de la classe dossier.DossierSource
-        :param dossier_destination: Une instance de la classe dossier.DossierDestination
-        :param dossier_source_backup: Une instance de la classe dossier.DossierSource pour récupérer les
-                                        données à remettre
-        """
-
-        if annulsuppr.version == 0:
-            suffixe = "_0"
-        else:
-            suffixe = "_" + str(annulsuppr.version) + "_" + annulsuppr.client_unique
-
-        Resumes.annuler(suffixe, annulsuppr.client_unique, annulsuppr.mois, annulsuppr.annee, dossier_source,
-                        dossier_destination, dossier_source_backup)
-
-    @staticmethod
-    def annulation(annulation, dossier_source, dossier_destination, dossier_source_backup):
-        """
-        annulation de modification des résumés mensuels au niveau du client dont la facture est supprimée 
-        :param annulation: paramètres d'annulation
-        :param dossier_source: Une instance de la classe dossier.DossierSource
-        :param dossier_destination: Une instance de la classe dossier.DossierDestination
-        :param dossier_source_backup: Une instance de la classe dossier.DossierSource pour récupérer les 
-                                        données à remettre
-        """
-        if annulation.recharge_version == 0:
-            suffixe = "_0"
-        else:
-            suffixe = "_" + str(annulation.recharge_version) + "_" + annulation.client_unique
-
-        Resumes.annuler(suffixe, annulation.client_unique, annulation.mois, annulation.annee, dossier_source,
-                        dossier_destination, dossier_source_backup)
-
-    @staticmethod
-    def annuler(suffixe, client_unique, mois, annee, dossier_source, dossier_destination, dossier_source_backup):
-        """
-        annulation de modification des résumés mensuels au niveau du client dont la facture est supprimée
-        :param suffixe: suffixe dossier version
-        :param client_unique: client concerné
-        :param mois: mois concerné
-        :param annee: année concernée
-        :param dossier_source: Une instance de la classe dossier.DossierSource
-        :param dossier_destination: Une instance de la classe dossier.DossierDestination
-        :param dossier_source_backup: Une instance de la classe dossier.DossierSource pour récupérer les
-                                        données à remettre
-        """
-        for i in range(len(Resumes.fichiers)):
-            fichier_backup = Resumes.fichiers[i] + "_" + str(annee) + "_" + Outils.mois_string(mois) + suffixe + ".csv"
-            donnees_backup = Resumes.ouvrir_csv_seulement_client(
-                dossier_source_backup, fichier_backup, client_unique, Resumes.positions[i])
-
-            fichier_complet = Resumes.fichiers[i] + "_" + str(annee) + "_" + Outils.mois_string(mois) + ".csv"
-            donnees_csv = Resumes.ouvrir_csv_sans_client(
-                dossier_source, fichier_complet, client_unique, Resumes.positions[i])
-            with dossier_destination.writer(fichier_complet) as fichier_writer:
-                for ligne in donnees_csv:
-                    fichier_writer.writerow(ligne)
-                for ligne in donnees_backup:
-                    fichier_writer.writerow(ligne)
-
-        ticket_backup = "ticket_" + str(annee) + "_" + Outils.mois_string(mois) + suffixe + ".html"
-        ticket_backup_texte = dossier_source_backup.string_lire(ticket_backup)
-        index1, index2 = Resumes.section_position(ticket_backup_texte, client_unique)
-        section = ""
-        if index1 is not None:
-            section = ticket_backup_texte[index1:index2]
-
-        nom_client = ""
-        index1, index2, clients_liste_backup = Resumes.select_clients(ticket_backup_texte)
-        for nom in clients_liste_backup:
-            if client_unique in nom:
-                nom_client = nom
-                break
-        ticket_complet = "ticket_" + str(annee) + "_" + Outils.mois_string(mois) + ".html"
-
-        Resumes.maj_ticket(dossier_source, dossier_destination, ticket_complet, section, client_unique, nom_client)
 
     @staticmethod
     def ouvrir_csv_sans_comptes_client(dossier_source, fichier, code_client, comptes, position_id=0):
@@ -301,28 +188,6 @@ class Resumes(object):
                 if ligne == -1:
                     continue
                 if ligne[position_code] != code_client:
-                    donnees_csv.append(ligne)
-        except IOError as e:
-            Outils.fatal(e, "impossible d'ouvrir le fichier : " + fichier)
-        return donnees_csv
-
-    @staticmethod
-    def ouvrir_csv_seulement_client(dossier_source, fichier, code_client, position_code):
-        """
-        ouverture d'un csv comme string seulement pour les données d'un client donné
-        :param dossier_source: Une instance de la classe dossier.DossierSource
-        :param fichier: nom du fichier csv
-        :param code_client: code du client à prendre en compte
-        :param position_code: position colonne du code client dans le csv
-        :return: donnees du csv modifiées en tant que string
-        """
-        donnees_csv = []
-        try:
-            fichier_reader = dossier_source.reader(fichier)
-            for ligne in fichier_reader:
-                if ligne == -1:
-                    continue
-                if ligne[position_code] == code_client:
                     donnees_csv.append(ligne)
         except IOError as e:
             Outils.fatal(e, "impossible d'ouvrir le fichier : " + fichier)

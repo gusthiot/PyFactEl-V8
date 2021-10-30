@@ -53,7 +53,7 @@ class BilansTransacts(object):
             date, info = Outils.est_une_date(transaction['transac-date'], "la date de transaction")
             if info != "":
                 Outils.affiche_message(info)
-            type_s = transaction['proj-subs']
+            type_s = transaction['subsid-code']
             subs, info = Outils.est_un_nombre(transaction['subsid-maxproj'], "le subside projet", min=0, arrondi=2)
             if info != "":
                 Outils.affiche_message(info)

@@ -8,7 +8,7 @@ class Client(Fichier):
     Classe pour l'importation des données de Clients Cmi
     """
 
-    cles = ['annee', 'mois', 'code', 'code_sap', 'abrev_labo', 'ref', 'dest', 'email', 'mode', 'id_classe']
+    cles = ['annee', 'mois', 'code', 'code_sap', 'abrev_labo', 'nom2', 'nom3', 'ref', 'email', 'mode', 'id_classe']
     nom_fichier = "client.csv"
     libelle = "Clients"
 
@@ -62,9 +62,11 @@ class Client(Fichier):
 
             donnee['abrev_labo'], info = Outils.est_un_alphanumerique(donnee['abrev_labo'], "l'abrev. labo", ligne)
             msg += info
-            donnee['ref'], info = Outils.est_un_texte(donnee['ref'], "la référence", ligne, True)
+            donnee['nom2'], info = Outils.est_un_texte(donnee['nom2'], "le nom 2", ligne, True)
             msg += info
-            donnee['dest'], info = Outils.est_un_texte(donnee['dest'], "le destinataire", ligne, True)
+            donnee['nom3'], info = Outils.est_un_texte(donnee['nom3'], "le nom 3", ligne, True)
+            msg += info
+            donnee['ref'], info = Outils.est_un_texte(donnee['ref'], "la référence", ligne, True)
             msg += info
 
             if donnee['id_classe'] == "":
