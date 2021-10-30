@@ -185,7 +185,7 @@ class Outils(object):
         :return: séparateur, string
         """
         if "\\" in generaux.chemin:
-            if "/" in generaux.chemin or "/" in generaux.chemin_propre:
+            if "/" in generaux.chemin or "/" in generaux.chemin_filigrane:
                 Outils.affiche_message("'/' et '\\' présents dans les chemins des paramètres généraux !!! ")
             texte = texte.replace("/", "\\")
             """
