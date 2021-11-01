@@ -7,6 +7,21 @@ class Paramtexte(object):
      Classe pour les labels
      """
 
+    cles = ['invoice-year', 'invoice-month', 'invoice-ref', 'platf-code', 'platf-op', 'platf-sap',
+            'platf-name', 'platf-cf', 'platf-fund', 'client-code', 'client-sap', 'client-name',
+            'client-idclass', 'client-class', 'client-labelclass', 'oper-id', 'oper-name', 'oper-note', 'oper-PO',
+            'staff-note', 'mach-id', 'mach-name', 'mach-extra', 'user-id', 'user-sciper', 'user-name', 'user-first',
+            'proj-id', 'proj-nbr', 'proj-name', 'proj-expl', 'item-id', 'item-idsap', 'item-type', 'item-penalty',
+            'item-service', 'item-good', 'item-nbr', 'item-name', 'item-unit', 'item-codeD', 'item-labelcode',
+            'item-sap', 'item-extra', 'transac-date', 'transac-usage', 'transac-runtime', 'transac-runcae',
+            'valuation-price', 'valuation-brut', 'discount-type', 'discount-HC', 'discount-LVR', 'discount-CHF',
+            'deduct-CHF', 'valuation-net', 'subsid-code', 'subsid-name', 'subsid-start', 'subsid-end', 'subsid-ok',
+            'subsid-pourcent', 'subsid-maxproj', 'subsid-maxmois', 'subsid-reste', 'subsid-CHF', 'subsid-deduct',
+            'discount-bonus', 'subsid-bonus', 'total-fact', 'OP-code', 'runtime-N', 'runtime-avg', 'runtime-stddev',
+            'conso-propre-march-expl', 'conso-propre-extra-expl', 'conso-propre-march-proj', 'conso-propre-extra-proj',
+            'year', 'month', 'day', 'week-nbr', 'subsid-alrdygrant', 'your-ref', 'stat-nbuser-d', 'stat-nbuser-w',
+            'stat-nbuser-m', 'stat-nbuser-3m', 'stat-nbuser-6m', 'stat-nbuser-12m', 'stat-trans',
+            'stat-run', 'stat-hmach']
     nom_fichier = "paramtext.csv"
     libelle = "Paramètres de Texte"
 
@@ -25,7 +40,7 @@ class Paramtexte(object):
                     Outils.fatal(ErreurConsistance(),
                                  self.libelle + ": nombre de colonnes incorrect : " + str(len(ligne)) + ", attendu : 2")
                 if ligne[0] in labels:
-                    Outils.fatal(ErreurConsistance(),self.libelle + "le label '" + ligne[0] + " n'est pas unique\n")
+                    Outils.fatal(ErreurConsistance(), self.libelle + "le label '" + ligne[0] + " n'est pas unique\n")
 
                 ligne[0], err = Outils.est_un_alphanumerique(ligne[0], "le label", chevrons=True)
                 if err != "":
@@ -36,6 +51,11 @@ class Paramtexte(object):
 
                 labels.append(ligne[0])
                 self.donnees[ligne[0]] = ligne[1]
+
+            for cle in self.cles:
+                if cle not in labels:
+                    Outils.fatal(ErreurConsistance(),
+                                 self.libelle + ": la clé " + cle + " n'est pas présente dans paramtext.csv")
 
         except IOError as e:
             Outils.fatal(e, "impossible d'ouvrir le fichier : "+self.nom_fichier)
