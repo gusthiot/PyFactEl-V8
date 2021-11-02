@@ -390,7 +390,7 @@ class Transactions(Recap):
                                 if self.check_plateforme(dict_s, article['platf-code'], id_classe,
                                                          compte['code_client'], id_machine):
                                     result[4] = "YES"
-                                    cg_id = compte['id_compte'] + article['item-codeD']
+                                    cg_id = compte['id_compte'] + article['item-idsap']
                                     if cg_id in grants.donnees.keys():
                                         grant = grants.donnees[cg_id]['montant']
                                     else:
@@ -406,7 +406,7 @@ class Transactions(Recap):
                                     mo = min(max_mo, res)
                                     if cg_id not in self.comptabilises.keys():
                                         self.comptabilises[cg_id] = {'id_compte': compte['id_compte'],
-                                                                     'code_d': article['item-codeD'],
+                                                                     'id_article': article['item-idsap'],
                                                                      'montant': mo}
                                     else:
                                         self.comptabilises[cg_id]['montant'] = self.comptabilises[cg_id]['montant'] + mo

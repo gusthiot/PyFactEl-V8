@@ -31,9 +31,9 @@ class Articles(Recap):
             cat = categories.donnees[key]
             art = artsap.donnees[cat['id_article']]
             if cat['id_article'] == artsap.id_d1:
-                genre = pt['item-penalty']
-            elif cat['id_article'] == artsap.id_d2:
                 genre = pt['item-service']
+            elif cat['id_article'] == artsap.id_d2:
+                genre = pt['item-penalty']
             else:
                 genre = ""
                 Outils.fatal("Erreur code D", "Une catégorie devrait avoir un code D1 ou D2")

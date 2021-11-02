@@ -138,11 +138,11 @@ class TablesAnnexes(object):
         if scl['somme_t'] > 0 or (filtre == "NON" and brut > 0):
             structure = r'''{|c|l|r|r|r|}'''
             legende = r'''Récapitulatif des postes de la facture'''
-            article_d1 = artsap.donnees[artsap.id_d1]
+            article_d2 = artsap.donnees[artsap.id_d2]
 
             dico = {'resm': Outils.format_2_dec(scl['rm']), 'resr': Outils.format_2_dec(scl['rr']),
                     'res': Outils.format_2_dec(scl['r']), 'p_res': generaux.poste_reservation,
-                    'int_res': Latex.echappe_caracteres(article_d1['intitule_long'])}
+                    'int_res': Latex.echappe_caracteres(article_d2['intitule_long'])}
 
             contenu = r'''
                 \hline
@@ -492,10 +492,10 @@ class TablesAnnexes(object):
             \hline'''
 
         if sco['somme_j_mm'] > 0:
-            article_d2 = artsap.donnees[artsap.id_d2]
+            article_d1 = artsap.donnees[artsap.id_d1]
             dico = {'mm': Outils.format_2_dec(sco['somme_j_mm']), 'mr': Outils.format_2_dec(sco['somme_j_mr']),
                     'mj': Outils.format_2_dec(sco['mj']),
-                    'int_proc': Latex.echappe_caracteres(article_d2['intitule_long'])}
+                    'int_proc': Latex.echappe_caracteres(article_d1['intitule_long'])}
             contenu += r'''
                 %(int_proc)s & %(mm)s & %(mr)s & %(mj)s \\
                 \hline

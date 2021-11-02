@@ -85,7 +85,7 @@ class Annexes(object):
                     if sco['c1'] > 0 and not (filtre == "OUI" and sco['c2'] == 0):
                         poste = inc_fact * 10
                         intitule = Latex.echappe_caracteres(intitule_compte + " - " +
-                                                            artsap.donnees[artsap.id_d2]['intitule_long'])
+                                                            artsap.donnees[artsap.id_d1]['intitule_long'])
 
                         if sco['somme_j_mm'] > 0 and not (filtre == "OUI" and sco['mj'] == 0):
                             dico_prix_xf = {'intitule': intitule, 'poste': str(poste),

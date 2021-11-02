@@ -121,10 +121,10 @@ class Facture(object):
 
             if scl['rm'] > 0 and not (filtre == "OUI" and scl['r'] == 0):
                 poste = generaux.poste_reservation
-                article_d1 = artsap.donnees[artsap.id_d1]
-                fichier_tab.append(self.ligne_facture(generaux, article_d1, poste, scl['rm'], scl['rr'], op_centre, "",
+                article_d2 = artsap.donnees[artsap.id_d2]
+                fichier_tab.append(self.ligne_facture(generaux, article_d2, poste, scl['rm'], scl['rr'], op_centre, "",
                                                       edition))
-                contenu_client += self.ligne_tableau(article_d1, poste, scl['rm'], scl['rr'], "", edition)
+                contenu_client += self.ligne_tableau(article_d2, poste, scl['rm'], scl['rr'], "", edition)
 
             inc = 1
 
@@ -137,15 +137,15 @@ class Facture(object):
                     compte = comptes.donnees[id_compte]
                     if sco['c1'] > 0 and not (filtre == "OUI" and sco['c2'] == 0):
                         poste = inc*10
-                        article_d2 = artsap.donnees[artsap.id_d2]
+                        article_d1 = artsap.donnees[artsap.id_d1]
                         if sco['somme_j_mm'] > 0 and not (filtre == "OUI" and sco['mj'] == 0):
                             fichier_tab.append(
-                                self.ligne_facture(generaux, article_d2, poste,
+                                self.ligne_facture(generaux, article_d1, poste,
                                                    sco['somme_j_mm'], sco['somme_j_mr'], op_centre,
                                                    compte['numero'] + " - " + compte['intitule'], edition)
                             )
                             contenu_client += self.ligne_tableau(
-                                article_d2, poste, sco['somme_j_mm'], sco['somme_j_mr'],
+                                article_d1, poste, sco['somme_j_mm'], sco['somme_j_mr'],
                                 compte['numero'] + " - " + compte['intitule'], edition
                             )
                             poste += 1
