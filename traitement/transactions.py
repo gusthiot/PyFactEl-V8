@@ -125,7 +125,7 @@ class Transactions(Recap):
                     runcae = ""
                 else:
                     usage = duree_hp
-                    runtime = entree['duree_run']
+                    runtime = round(entree['duree_run']/60, 4)
                     if counted:
                         runcae = ""
                     else:
@@ -151,7 +151,7 @@ class Transactions(Recap):
                     if duree_hp > 0:
                         runtime = ""
                     else:
-                        runtime = entree['duree_run']
+                        runtime = round(entree['duree_run']/60, 4)
                     if counted:
                         runcae = ""
                     else:
@@ -377,7 +377,7 @@ class Transactions(Recap):
                 result[2] = subside['debut']
                 result[3] = subside['fin']
                 result[4] = "NO"
-                plaf = type_s + article['item-codeD']
+                plaf = type_s + article['item-idsap']
                 if plaf in plafonds.donnees.keys():
                     plafond = plafonds.donnees[plaf]
                     result[5] = plafond['pourcentage']
