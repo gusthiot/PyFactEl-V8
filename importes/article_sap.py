@@ -64,8 +64,6 @@ class ArticleSap(Fichier):
                     msg += "l'id de l'article '" + donnee['id_article'] + "' de la ligne " + str(ligne) +\
                            " n'est pas unique\n"
 
-            if donnee['flux'] != 'noshow' and donnee['flux'] != 'cae' and donnee['flux'] != 'lvr':
-                msg += "le flux de la ligne " + str(ligne) + " doit être cae, noshow ou lvr\n"
             donnee['code_d'], info = Outils.est_un_alphanumerique(donnee['code_d'], "le code D", ligne)
             msg += info
             donnee['intitule_long'], info = Outils.est_un_texte(donnee['intitule_long'], "l'intitulé long", ligne)
@@ -90,10 +88,13 @@ class ArticleSap(Fichier):
 
             if donnee['flux'] == 'lvr':
                 self.ids_d3.append(donnee['id_article'])
-            if donnee['flux'] == 'cae':
+            elif donnee['flux'] == 'cae':
                 self.id_d1 = donnee['id_article']
-            if donnee['flux'] == 'noshow':
+            elif donnee['flux'] == 'noshow':
                 self.id_d2 = donnee['id_article']
+            else:
+                msg += "le flux de la ligne " + str(ligne) + " doit être cae, noshow ou lvr\n"
+
             donnees_dict[donnee['id_article']] = donnee
             ligne += 1
 

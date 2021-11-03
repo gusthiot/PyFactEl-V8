@@ -292,13 +292,13 @@ class Transactions(Recap):
                 if classes.donnees[id_classe]['subsides'] == "BONUS":
                     ded_bon = transact['val'][3]
                     ded_rab = 0
-                    sub_bon = subs[8]
+                    sub_bon = subs[9]
                     sub_rab = 0
                 else:
                     ded_bon = 0
                     ded_rab = transact['val'][3]
                     sub_bon = 0
-                    sub_rab = subs[8]
+                    sub_rab = subs[9]
                 if article['platf-code'] == compte['code_client']:
                     tot = 0
                 else:
