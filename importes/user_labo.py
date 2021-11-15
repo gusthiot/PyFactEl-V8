@@ -7,8 +7,8 @@ class UserLabo(Fichier):
     Classe pour l'importation des données des Utilisateurs des  laboratoires
     """
 
-    cles = ['year', 'month', 'day', 'week', 'id_plateforme', 'code_p', 'intitule', 'code_client', 'abrev_labo',
-            'id_classe', 'id_user', 'sciper', 'nom', 'prenom']
+    cles = ['year', 'month', 'day', 'week-nbr', 'platf-code', 'platf-op', 'platf-name', 'client-code', 'client-name',
+            'client-class', 'user-id', 'user-sciper', 'user-name', 'user-first']
     libelle = "User labo"
 
     def __init__(self, dossier_source, edition):
@@ -30,30 +30,30 @@ class UserLabo(Fichier):
 
         msg = ""
         ligne = 1
-        donnees_dict = {}
+        donnees_list = []
 
         del self.donnees[0]
         for donnee in self.donnees:
-            if donnee['id_plateforme'] == "":
+            if donnee['platf-code'] == "":
                 msg += "l'id plateforme de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif plateformes.contient_id(donnee['id_plateforme']) == 0:
-                msg += "l'id plateforme '" + donnee['id_plateforme'] + "' de la ligne " + str(ligne) \
+            elif plateformes.contient_id(donnee['platf-code']) == 0:
+                msg += "l'id plateforme '" + donnee['platf-code'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
-            if donnee['code_client'] == "":
+            if donnee['client-code'] == "":
                 msg += "le code client de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif donnee['code_client'] not in clients.donnees:
-                msg += "le code client " + donnee['code_client'] + " de la ligne " + str(ligne) + \
+            elif donnee['client-code'] not in clients.donnees:
+                msg += "le code client " + donnee['client-code'] + " de la ligne " + str(ligne) + \
                        " n'est pas référencé\n"
-            if donnee['id_user'] == "":
+            if donnee['user-id'] == "":
                 msg += "le user id de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif users.contient_id(donnee['id_user']) == 0:
-                msg += "le user id '" + donnee['id_user'] + "' de la ligne " + str(ligne) \
+            elif users.contient_id(donnee['user-id']) == 0:
+                msg += "le user id '" + donnee['user-id'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
 
-            donnees_dict[donnee['id_plateforme']+donnee['code_client']+donnee['id_user']] = donnee
+            donnees_list.append(donnee)
             ligne += 1
 
-        self.donnees = donnees_dict
+        self.donnees = donnees_list
         self.verifie_coherence = 1
 
         if msg != "":

@@ -7,7 +7,6 @@ from traitement import UserLaboNew
 from outils import Outils
 
 
-
 class BilansTransacts(object):
     """
     Classe pour la création des csv des bilans des transactions
@@ -26,7 +25,7 @@ class BilansTransacts(object):
         self.usr_lab = UserLaboNew(edition)
 
     def generer(self, trans_vals, grants, plafonds, comptes, clients, subsides, paramtexte, paramannexe, artsap,
-                dossier_destination):
+                userlabs, dossier_destination):
         """
         tri des transactions et génération des bilans
         :param trans_vals: valeurs des transactions générées
@@ -38,6 +37,7 @@ class BilansTransacts(object):
         :param paramtexte: paramètres textuels
         :param paramannexe: paramètres d'annexe
         :param artsap: articles SAP importés
+        :param userlabs: users labo importés
         :param dossier_destination: Une instance de la classe dossier.DossierDestination
         """
         par_client = {}
@@ -107,4 +107,4 @@ class BilansTransacts(object):
         self.bil_plat.generer(trans_vals, paramtexte, dossier_destination, par_plate)
         self.bil_use.generer(trans_vals, paramtexte, dossier_destination, par_plate)
         self.bil_conso.generer(trans_vals, paramtexte, dossier_destination, par_plate)
-        self.usr_lab.generer(trans_vals, paramtexte, dossier_destination, par_plate)
+        self.usr_lab.generer(trans_vals, paramtexte, dossier_destination, par_plate, userlabs)

@@ -1,5 +1,6 @@
 from outils import Outils
 from traitement import Recap
+import math
 
 
 class BilanUsages(Recap):
@@ -8,7 +9,7 @@ class BilanUsages(Recap):
     """
 
     cles = ['invoice-year', 'invoice-month', 'platf-code', 'platf-name', 'item-id', 'item-nbr', 'item-name',
-            'item-unit', 'transac-usage']
+            'item-unit', 'transac-usage', 'transac-runtime', 'runtime-N', 'runtime-avg', 'runtime-stddev']
 
     def __init__(self, edition):
         """
@@ -34,15 +35,34 @@ class BilanUsages(Recap):
                 base = trans_vals[tbtr[0]]
                 if base['item-type'] == paramtexte.donnees['item-service']:
                     donnee = []
-                    for cle in range(2, len(self.cles)-1):
+                    for cle in range(2, len(self.cles)-5):
                         donnee.append(base[self.cles[cle]])
                     usage = 0
+                    runtime = 0
+                    nn = 0
+                    avg = 0
+                    stddev = 0
+                    rts = []
                     for indice in tbtr:
-                        val, info = Outils.est_un_nombre(trans_vals[indice]['transac-usage'], "l'usage", arrondi=4)
+                        use, info = Outils.est_un_nombre(trans_vals[indice]['transac-usage'], "l'usage", arrondi=4)
                         if info != "":
                             Outils.affiche_message(info)
-                        usage += val
-                    donnee += [round(usage, 4)]
+                        usage += use
+                        if trans_vals[indice]['transac-runtime'] != "":
+                            rti, info = Outils.est_un_nombre(trans_vals[indice]['transac-runtime'], "le runtime", 
+                                                             arrondi=4)
+                            if info != "":
+                                Outils.affiche_message(info)
+                            runtime += rti
+                            nn += 1
+                            rts.append(rti)
+                    if nn > 0:
+                        avg = runtime / nn
+                        somme = 0
+                        for rt in rts:
+                            somme += math.pow(rt-avg, 2)
+                        stddev = math.sqrt(1 / nn * somme)
+                    donnee += [round(usage, 4), runtime, nn, avg, stddev]
                     self.ajouter_valeur(donnee, ii)
                     ii += 1
 

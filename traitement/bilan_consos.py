@@ -7,9 +7,9 @@ class BilanConsos(Recap):
     Classe pour la création du csv de bilan de consommation propre
     """
 
-    cles = ['invoice-year', 'invoice-month', 'platf-code', 'platf-name', 'item-id', 'item-nbr', 'item-name',
-            'item-unit', 'item-codeD', 'item-extra', 'conso-propre-march-expl', 'conso-propre-extra-expl',
-            'conso-propre-march-proj', 'conso-propre-extra-proj']
+    cles = ['invoice-year', 'invoice-month', 'platf-code', 'platf-name', 'proj-id', 'proj-nbr', 'proj-name',
+            'proj-expl', 'item-id', 'item-nbr', 'item-name', 'item-unit', 'item-codeD', 'item-extra',
+            'conso-propre-march-expl', 'conso-propre-extra-expl', 'conso-propre-march-proj', 'conso-propre-extra-proj']
 
     def __init__(self, edition):
         """
