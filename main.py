@@ -33,6 +33,7 @@ from importes import (Client,
                       User,
                       NoShow,
                       Granted,
+                      UserLabo,
                       PlafSubside,
                       Plateforme,
                       Subside,
@@ -88,6 +89,7 @@ try:
     coefprests = CoefPrest(dossier_source)
     comptes = Compte(dossier_source)
     grants = Granted(dossier_source, edition)
+    userlabs = UserLabo(dossier_source, edition)
     livraisons = Livraison(dossier_source)
     machines = Machine(dossier_source)
     groupes = Groupe(dossier_source)
@@ -115,7 +117,8 @@ try:
 
     if verification.verification_coherence(generaux, edition, acces, categories, categprix, clients, coefprests,
                                            comptes, grants, livraisons, machines, noshows, plafonds, plateformes,
-                                           prestations, subsides, users, docpdf, groupes, cles, classes, artsap) > 0:
+                                           prestations, subsides, users, docpdf, groupes, cles, classes, artsap,
+                                           userlabs) > 0:
         sys.exit("Erreur dans la cohérence")
 
     ## génération du dossier destination
@@ -153,7 +156,7 @@ try:
                     users.nom_fichier, generaux.nom_fichier, grants.nom_fichier, edition.nom_fichier,
                     categprix.nom_fichier, paramannexe.nom_fichier, noshows.nom_fichier, plafonds.nom_fichier,
                     plateformes.nom_fichier, subsides.nom_fichier, paramtexte.nom_fichier, groupes.nom_fichier,
-                    cles.nom_fichier, artsap.nom_fichier, classes.nom_fichier]:
+                    cles.nom_fichier, artsap.nom_fichier, classes.nom_fichier, userlabs.nom_fichier]:
         dossier_destination.ecrire(fichier, dossier_source.lire(fichier))
     if docpdf is not None:
         dossier_destination.ecrire(docpdf.nom_fichier, dossier_source.lire(docpdf.nom_fichier))

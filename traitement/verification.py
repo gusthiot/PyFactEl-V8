@@ -41,7 +41,7 @@ class Verification(object):
 
     def verification_coherence(self, generaux, edition, acces, categories, categprix, clients, coefprests, comptes,
                                grants, livraisons, machines, noshows, plafonds, plateformes, prestations, subsides,
-                               users, docpdf, groupes, cles, classes, artsap):
+                               users, docpdf, groupes, cles, classes, artsap, userlabs):
         """
         vérifie la cohérence des données importées
         :param generaux: paramètres généraux
@@ -66,6 +66,7 @@ class Verification(object):
         :param cles: clés subsides importées
         :param classes: classes clients importées
         :param artsap: articles sap importés
+        :param userlabs: users labo importés
         :return: 0 si ok, sinon le nombre d'échecs à la vérification
         """
         verif = 0
@@ -87,6 +88,7 @@ class Verification(object):
         verif += cles.est_coherent(plateformes, clients, machines, classes, subsides)
         verif += comptes.est_coherent(clients, subsides)
         verif += grants.est_coherent(comptes, artsap)
+        verif += userlabs.est_coherent(plateformes, clients, users)
         verif += acces.est_coherent(comptes, machines, users)
         verif += noshows.est_coherent(comptes, machines, users)
         verif += livraisons.est_coherent(comptes, prestations, users)

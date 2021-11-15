@@ -3,7 +3,7 @@ from traitement import AnnexeSubsides
 from traitement import BilanPlates
 from traitement import BilanUsages
 from traitement import BilanConsos
-from traitement import UserLabo
+from traitement import UserLaboNew
 from outils import Outils
 
 
@@ -23,7 +23,7 @@ class BilansTransacts(object):
         self.bil_plat = BilanPlates(edition)
         self.bil_use = BilanUsages(edition)
         self.bil_conso = BilanConsos(edition)
-        self.usr_lab = UserLabo(edition)
+        self.usr_lab = UserLaboNew(edition)
 
     def generer(self, trans_vals, grants, plafonds, comptes, clients, subsides, paramtexte, paramannexe, artsap,
                 dossier_destination):

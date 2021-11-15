@@ -2,7 +2,7 @@ from outils import Outils
 from traitement import Recap
 
 
-class UserLabo(Recap):
+class UserLaboNew(Recap):
     """
     Classe pour la création du csv des utilisations des plateformes
     """

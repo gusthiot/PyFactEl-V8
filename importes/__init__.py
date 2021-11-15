@@ -19,3 +19,4 @@ from .groupe import Groupe
 from .clesubside import CleSubside
 from .article_sap import ArticleSap
 from .classe_client import ClasseClient
+from .user_labo import UserLabo

@@ -17,5 +17,5 @@ from .annexe_subsides import AnnexeSubsides
 from .bilan_plates import BilanPlates
 from .bilan_usages import BilanUsages
 from .bilan_consos import BilanConsos
-from .user_labo import UserLabo
+from .user_labo_new import UserLaboNew
 from .bilans_transacts import BilansTransacts
