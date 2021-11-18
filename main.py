@@ -204,9 +204,9 @@ try:
     else:
         new_grants.csv(DossierDestination(dossier_enregistrement))
 
-    bilan_trs = BilansTransacts(edition)
-    bilan_trs.generer(trans_vals, grants, plafonds, comptes, clients, subsides, paramtexte, paramannexe, artsap,
-                      userlabs, DossierDestination(dossier_enregistrement))
+    bilan_trs = BilansTransacts(edition, paramtexte, paramannexe)
+    bilan_trs.generer(trans_vals, grants, plafonds, comptes, clients, subsides, artsap, userlabs,
+                      DossierDestination(dossier_enregistrement))
 
     # faire les annexes avant la facture, que le ticket puisse vérifier leur existence
     if Latex.possibles():
@@ -217,7 +217,7 @@ try:
     Outils.copier_dossier("./reveal.js/", "css", dossier_enregistrement)
     facture_prod = Facture()
     f_html_sections = facture_prod.factures(sommes, dossier_destination, edition, generaux, clients, comptes,
-                                            paramannexe, bilan_trs, artsap, classes)
+                                            paramannexe, bilan_trs, artsap, classes, paramtexte)
 
     prod2qual = Prod2Qual(dossier_source)
     if prod2qual.actif:
@@ -225,8 +225,8 @@ try:
         facture_qual.factures(sommes, dossier_destination, edition, generaux, clients, comptes, paramannexe, bilan_trs,
                               artsap, classes)
 
-    bm_lignes = BilanMensuel.creation_lignes(edition, sommes, clients, artsap, classes)
-    BilanMensuel.bilan(dossier_destination, edition, artsap, bm_lignes)
+    bm_lignes = BilanMensuel.creation_lignes(edition, sommes, clients, classes)
+    BilanMensuel.bilan(dossier_destination, edition, bm_lignes)
 
     if edition.filigrane == "":
         if edition.version == 0:

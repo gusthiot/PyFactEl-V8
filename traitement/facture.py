@@ -18,7 +18,7 @@ class Facture(object):
         self.prod2qual = prod2qual
 
     def factures(self, sommes, destination, edition, generaux, clients, comptes, paramannexe, bilan_trs, artsap,
-                 classes):
+                 classes, paramtexte):
         """
         génère la facture sous forme de csv
         
@@ -32,6 +32,7 @@ class Facture(object):
         :param bilan_trs: bilans des transactions
         :param artsap: articles SAP importés
         :param classes: classes clients importés
+        :param paramtexte: paramètres textuels
         :return: données du combolist et des sections
         """
 
@@ -98,10 +99,11 @@ class Facture(object):
                 </tr>
                 '''
 
+            pt = paramtexte.donnees
             ligne = [poste, generaux.origine, genre, generaux.commerciale, generaux.canal, generaux.secteur, "", "",
                      code_sap_traduit, client['nom2'], client['nom3'], client['email'], code_sap_traduit,
                      code_sap_traduit, code_sap_traduit, generaux.devise, client['mode'], reference, "", "",
-                     client['ref']]
+                     pt['your-ref'] + client['ref']]
             for donnee in paramannexe.donnees:
                 nom_annexe = donnee['nom'] + "_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois) + \
                              "_" + str(edition.version) + "_" + code_client + ".pdf"

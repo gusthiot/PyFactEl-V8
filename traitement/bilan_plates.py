@@ -1,8 +1,7 @@
 from outils import Outils
-from traitement import Recap
 
 
-class BilanPlates(Recap):
+class BilanPlates(object):
     """
     Classe pour la création du csv de bilan plateformes
     """
@@ -12,22 +11,28 @@ class BilanPlates(Recap):
             'item-codeD', 'item-labelcode', 'item-sap', 'valuation-brut', 'valuation-net', 'deduct-CHF',
             'subsid-deduct', 'total-fact', 'discount-bonus', 'subsid-bonus', 'OP-code']
 
-    def __init__(self, edition):
+    def __init__(self, edition, paramtexte):
         """
         initialisation des données et stockage des paramètres d'édition
         :param edition: paramètres d'édition
+        :param paramtexte: paramètres textuels
         """
-        super().__init__(edition)
-        self.nom = "Bilan-plateforme-client_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois) + ".csv"
+        self.annee = edition.annee
+        self.mois = edition.mois
+        self.paramtexte = paramtexte
 
-    def generer(self, trans_vals, paramtexte, dossier_destination, par_plate):
+    def generer(self, trans_vals, dossier_destination, par_plate):
         """
         génération du fichier de bilan des plateformes à partir des transactions
         :param trans_vals: valeurs des transactions générées
-        :param paramtexte: paramètres textuels
         :param dossier_destination: Une instance de la classe dossier.DossierDestination
         :param par_plate: tri des transactions par plateforme, par client, par code D
         """
+        pt = self.paramtexte.donnees
+
+        nom = "Bilan-plateforme-client_" + str(self.annee) + "_" + Outils.mois_string(self.mois) + ".csv"
+
+        lignes = []
         ii = 0
         for id_plate in par_plate.keys():
             par_client = par_plate[id_plate]['clients']
@@ -36,9 +41,9 @@ class BilanPlates(Recap):
                 for code_d in par_code.keys():
                     tbtr = par_code[code_d]
                     base = trans_vals[tbtr[0]]
-                    donnee = []
+                    ligne = [self.annee, self.mois]
                     for cle in range(2, len(self.cles)-8):
-                        donnee.append(base[self.cles[cle]])
+                        ligne.append(base[self.cles[cle]])
                     avant = 0
                     compris = 0
                     deduit = 0
@@ -78,9 +83,16 @@ class BilanPlates(Recap):
                         sub_remb += bonus
                     op = base['platf-op'] + base['client-class'] + str(self.annee)[2:4] + \
                         Outils.mois_string(self.mois) + code_d
-                    donnee += [round(avant, 2), round(compris, 2), round(deduit, 2), round(sub_ded, 2), round(fact, 2),
+                    ligne += [round(avant, 2), round(compris, 2), round(deduit, 2), round(sub_ded, 2), round(fact, 2),
                                round(remb, 2), round(sub_remb, 2), op]
-                    self.ajouter_valeur(donnee, ii)
+                    lignes.append(ligne)
                     ii += 1
 
-        self.csv(dossier_destination, paramtexte)
+        with dossier_destination.writer(nom) as fichier_writer:
+            ligne = []
+            for cle in self.cles:
+                ligne.append(pt[cle])
+            fichier_writer.writerow(ligne)
+
+            for ligne in lignes:
+                fichier_writer.writerow(ligne)

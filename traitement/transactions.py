@@ -227,12 +227,16 @@ class Transactions(Recap):
                 # K5 NoShow-HP #
                 article = articles.valeurs[groupe['id_cat_hp']]
                 tarif = tarifs.valeurs[id_classe + groupe['id_cat_hp']]
+                code = "K5"
+                texte = pt['item-K5']
             else:
                 # K6 NoShow-HC #
                 article = articles.valeurs[groupe['id_cat_hc']]
                 tarif = tarifs.valeurs[id_classe + groupe['id_cat_hc']]
+                code = "K6"
+                texte = pt['item-K6']
             ope = ["", "", "", "", id_machine, machine['nom'], ""]
-            art = self.art_plate(article, plateformes, clients, "K6", pt['item-K6'])
+            art = self.art_plate(article, plateformes, clients, code, texte)
             util_proj = self.util_proj(entree['id_user'], users, compte)
             trans = [entree['date_debut'], entree['penalite'], 0, "", ""]
             prix = round(entree['penalite'] * tarif['valuation-price'], 2)

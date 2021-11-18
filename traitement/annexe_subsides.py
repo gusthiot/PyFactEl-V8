@@ -1,10 +1,9 @@
 from outils import Outils
-from traitement import Recap
 from importes import DossierDestination
 from datetime import datetime
 
 
-class AnnexeSubsides(Recap):
+class AnnexeSubsides(object):
     """
     Classe pour la création du csv d'annexe subsides
     """
@@ -13,40 +12,40 @@ class AnnexeSubsides(Recap):
             'item-labelcode', 'subsid-code', 'subsid-name', 'subsid-start', 'subsid-end', 'subsid-pourcent',
             'subsid-maxproj', 'subsid-maxmois', 'subsid-alrdygrant', 'subsid-CHF', 'subsid-reste']
 
-    def __init__(self, edition):
+    def __init__(self, edition, paramtexte, paramannexe):
         """
         initialisation des données et stockage des paramètres d'édition
         :param edition: paramètres d'édition
+        :param paramtexte: paramètres textuels
+        :param paramannexe: paramètres d'annexe
         """
-        super().__init__(edition)
+        self.annee = edition.annee
+        self.mois = edition.mois
         self.version = edition.version
         self.unique = edition.client_unique
-        self.nom = ""
-        self.dossier = ""
-        self.chemin = "./"
-        self.prefixe = "Annexe-subsides_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois) + "_" + \
-            str(edition.version)
+        self.paramtexte = paramtexte
+        self.paramannexe = paramannexe
 
-    def generer(self, trans_vals, grants, plafonds, paramtexte, paramannexe, par_client, comptes, clients, subsides,
-                artsap):
+    def generer(self, trans_vals, grants, plafonds, par_client, comptes, clients, subsides, artsap):
         """
         génération des fichiers d'annexes subsides à partir des transactions
         :param trans_vals: valeurs des transactions générées
         :param grants: grants importés
         :param plafonds: plafonds importés
-        :param paramtexte: paramètres textuels
-        :param paramannexe: paramètres d'annexe
         :param par_client: tri des transactions par client, par compte, par code D
         :param comptes: comptes importés
         :param clients: clients importés
         :param subsides: subsides importés
         :param artsap: articles SAP importés
         """
-        for donnee in paramannexe.donnees:
+        pt = self.paramtexte.donnees
+
+        prefixe = "Annexe-subsides_" + str(self.annee) + "_" + Outils.mois_string(self.mois) + "_" + str(self.version)
+        chemin = "./"
+        for donnee in self.paramannexe.donnees:
             if donnee['nom'] == 'Annexe-détails':
-                self.chemin = donnee['chemin']
-                self.dossier = donnee['dossier']
-        dossier_destination = DossierDestination(self.chemin)
+                chemin = donnee['chemin']
+        dossier_destination = DossierDestination(chemin)
 
         clients_comptes = {}
         for id_compte in comptes.donnees.keys():
@@ -79,10 +78,10 @@ class AnnexeSubsides(Recap):
 
         for code in clients_comptes.keys():
             cc = clients_comptes[code]
-            self.valeurs = {}
             ii = 0
+            lignes = []
             client = clients.donnees[code]
-            self.nom = self.prefixe + "_" + code + "_" + client['abrev_labo'] + ".csv"
+            nom = prefixe + "_" + code + "_" + client['abrev_labo'] + ".csv"
             for id_compte in cc:
                 compte = comptes.donnees[id_compte]
                 type_s = compte['type_subside']
@@ -91,10 +90,10 @@ class AnnexeSubsides(Recap):
                     plaf = type_s + id_article
                     if plaf in plafonds.donnees.keys():
                         plafond = plafonds.donnees[plaf]
-                        donnee = [client['code'], client['abrev_labo'], compte['id_compte'], compte['intitule'],
-                                  id_article, artsap.donnees[id_article]['intitule_long'], subside['type'],
-                                  subside['intitule'], subside['debut'], subside['fin'], plafond['pourcentage'],
-                                  plafond['max_compte'], plafond['max_mois']]
+                        ligne = [self.annee, self.mois, client['code'], client['abrev_labo'], compte['id_compte'],
+                                 compte['intitule'], id_article, artsap.donnees[id_article]['intitule_long'],
+                                 subside['type'], subside['intitule'], subside['debut'], subside['fin'],
+                                 plafond['pourcentage'], plafond['max_compte'], plafond['max_mois']]
                         subs = 0
                         g_id = id_compte + id_article
                         if g_id in grants.donnees.keys():
@@ -114,7 +113,14 @@ class AnnexeSubsides(Recap):
                                     subs += val
 
                         reste = plafond['max_compte'] - grant - subs
-                        donnee += [round(grant, 2), round(subs, 2), round(reste, 2)]
-                        self.ajouter_valeur(donnee, ii)
+                        ligne += [round(grant, 2), round(subs, 2), round(reste, 2)]
+                        lignes.append(ligne)
                         ii += 1
-            self.csv(dossier_destination, paramtexte)
+            with dossier_destination.writer(nom) as fichier_writer:
+                ligne = []
+                for cle in self.cles:
+                    ligne.append(pt[cle])
+                fichier_writer.writerow(ligne)
+
+                for ligne in lignes:
+                    fichier_writer.writerow(ligne)

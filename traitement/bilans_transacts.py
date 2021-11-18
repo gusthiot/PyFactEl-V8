@@ -1,9 +1,13 @@
-from traitement import AnnexeDetails
-from traitement import AnnexeSubsides
-from traitement import BilanPlates
-from traitement import BilanUsages
-from traitement import BilanConsos
-from traitement import UserLaboNew
+from traitement import (AnnexeDetails,
+                        AnnexeSubsides,
+                        BilanPlates,
+                        BilanUsages,
+                        BilanConsos,
+                        UserLaboNew,
+                        StatUser,
+                        StatNbUser,
+                        StatMachine,
+                        StatClient)
 from outils import Outils
 
 
@@ -12,20 +16,25 @@ class BilansTransacts(object):
     Classe pour la création des csv des bilans des transactions
     """
 
-    def __init__(self, edition):
+    def __init__(self, edition, paramtexte, paramannexe):
         """
         initialisation des générateurs de bilans
         :param edition: paramètres d'édition
+        :param paramtexte: paramètres textuels
+        :param paramannexe: paramètres d'annexe
         """
-        self.ann_dets = AnnexeDetails(edition)
-        self.ann_subs = AnnexeSubsides(edition)
-        self.bil_plat = BilanPlates(edition)
-        self.bil_use = BilanUsages(edition)
-        self.bil_conso = BilanConsos(edition)
-        self.usr_lab = UserLaboNew(edition)
+        self.ann_dets = AnnexeDetails(edition, paramtexte, paramannexe)
+        self.ann_subs = AnnexeSubsides(edition, paramtexte, paramannexe)
+        self.bil_plat = BilanPlates(edition, paramtexte)
+        self.bil_use = BilanUsages(edition, paramtexte)
+        self.bil_conso = BilanConsos(edition, paramtexte)
+        self.usr_lab = UserLaboNew(edition, paramtexte)
+        self.stat_user = StatUser(edition, paramtexte)
+        self.stat_nb_user = StatNbUser(edition, paramtexte)
+        self.stat_cli = StatClient(edition, paramtexte)
+        self.stat_mach = StatMachine(edition, paramtexte)
 
-    def generer(self, trans_vals, grants, plafonds, comptes, clients, subsides, paramtexte, paramannexe, artsap,
-                userlabs, dossier_destination):
+    def generer(self, trans_vals, grants, plafonds, comptes, clients, subsides, artsap, userlabs, dossier_destination):
         """
         tri des transactions et génération des bilans
         :param trans_vals: valeurs des transactions générées
@@ -34,8 +43,6 @@ class BilansTransacts(object):
         :param comptes: comptes importés
         :param clients: clients importés
         :param subsides: subsides importés
-        :param paramtexte: paramètres textuels
-        :param paramannexe: paramètres d'annexe
         :param artsap: articles SAP importés
         :param userlabs: users labo importés
         :param dossier_destination: Une instance de la classe dossier.DossierDestination
@@ -48,7 +55,9 @@ class BilansTransacts(object):
             id_compte = transaction['proj-id']
             id_plateforme = transaction['platf-code']
             id_article = transaction['item-idsap']
+            id_projet = transaction['proj-id']
             item = transaction['item-id']
+            id_machine = transaction['mach-id']
             user_id = transaction['user-id']
             date, info = Outils.est_une_date(transaction['transac-date'], "la date de transaction")
             if info != "":
@@ -61,50 +70,69 @@ class BilansTransacts(object):
             if code_client not in par_client.keys():
                 par_client[code_client] = {'transactions': [], 'comptes': {}}
 
-            par_client[code_client]['transactions'].append(key)
+            par_client[code_client]['transactions'].append(key)  # => annexe details
 
             if type_s != "" and subs > 0:
                 pcc = par_client[code_client]['comptes']
                 if id_compte not in pcc.keys():
                     pcc[id_compte] = {}
-                pcd = pcc[id_compte]
-                if id_article not in pcd.keys():
-                    pcd[id_article] = [key]
+                pccd = pcc[id_compte]
+                if id_article not in pccd.keys():
+                    pccd[id_article] = [key]  # => annexe subsides
                 else:
-                    pcd[id_article].append(key)
+                    pccd[id_article].append(key)
 
             if id_plateforme not in par_plate.keys():
-                par_plate[id_plateforme] = {'clients': {}, 'items': {}, 'users': {}}
+                par_plate[id_plateforme] = {'clients': {}, 'items': {}, 'users': {}, 'machines': {}, 'projets': {}}
 
             ppc = par_plate[id_plateforme]['clients']
             if code_client not in ppc.keys():
                 ppc[code_client] = {}
-            ppd = ppc[code_client]
-            if id_article not in ppd.keys():
-                ppd[id_article] = [key]
+            ppcd = ppc[code_client]
+            if id_article not in ppcd.keys():
+                ppcd[id_article] = [key]
             else:
-                ppd[id_article].append(key)
+                ppcd[id_article].append(key)  # => bilan plates
 
             ppi = par_plate[id_plateforme]['items']
             if item not in ppi.keys():
                 ppi[item] = [key]
             else:
-                ppi[item].append(key)
+                ppi[item].append(key)  # => bilan usage
+
+            ppp = par_plate[id_plateforme]['projets']
+            if id_projet not in ppp.keys():
+                ppp[id_projet] = {}
+            pppi = ppp[id_projet]
+            if item not in pppi.keys():
+                pppi[item] = [key]
+            else:
+                pppi[item].append(key)  # => bilan conso
+
+            ppm = par_plate[id_plateforme]['machines']
+            if id_machine not in ppm.keys():
+                ppm[id_machine] = [key]
+            else:
+                ppm[id_machine].append(key)  # => stat machine
 
             ppu = par_plate[id_plateforme]['users']
             if user_id not in ppu.keys():
                 ppu[user_id] = {}
             if code_client not in ppu[user_id].keys():
-                ppu[user_id][code_client] = {}
-            day = date.day
+                ppu[user_id][code_client] = {'days': {}, 'transactions': []}
             ppuc = ppu[user_id][code_client]
-            if day not in ppuc.keys():
-                ppuc[day] = key
+            ppuc['transactions'].append(key)  # => stat user
+            day = date.day
+            if day not in ppuc['days'].keys():
+                ppuc['days'][day] = key  # => user labo
 
-        self.ann_dets.generer(trans_vals, paramtexte, paramannexe, par_client)
-        self.ann_subs.generer(trans_vals, grants, plafonds, paramtexte, paramannexe, par_client, comptes, clients,
-                              subsides, artsap)
-        self.bil_plat.generer(trans_vals, paramtexte, dossier_destination, par_plate)
-        self.bil_use.generer(trans_vals, paramtexte, dossier_destination, par_plate)
-        self.bil_conso.generer(trans_vals, paramtexte, dossier_destination, par_plate)
-        self.usr_lab.generer(trans_vals, paramtexte, dossier_destination, par_plate, userlabs)
+        self.ann_dets.generer(trans_vals, par_client)
+        self.ann_subs.generer(trans_vals, grants, plafonds, par_client, comptes, clients, subsides, artsap)
+        self.bil_plat.generer(trans_vals, dossier_destination, par_plate)
+        self.bil_use.generer(trans_vals, dossier_destination, par_plate)
+        self.bil_conso.generer(trans_vals, dossier_destination, par_plate)
+        self.usr_lab.generer(trans_vals, dossier_destination, par_plate, userlabs)
+        self.stat_user.generer(trans_vals, dossier_destination, par_plate)
+        self.stat_nb_user.generer(trans_vals, dossier_destination)
+        self.stat_cli.generer(trans_vals, dossier_destination)
+        self.stat_mach.generer(trans_vals, dossier_destination, par_plate)

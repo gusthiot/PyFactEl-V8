@@ -18,4 +18,8 @@ from .bilan_plates import BilanPlates
 from .bilan_usages import BilanUsages
 from .bilan_consos import BilanConsos
 from .user_labo_new import UserLaboNew
+from .stat_user import StatUser
+from .stat_client import StatClient
+from .stat_machine import StatMachine
+from .stat_nb_user import StatNbUser
 from .bilans_transacts import BilansTransacts

@@ -1,9 +1,8 @@
 from outils import Outils
-from traitement import Recap
 from importes import DossierDestination
 
 
-class AnnexeDetails(Recap):
+class AnnexeDetails(object):
     """
     Classe pour la création du csv d'annexe détails
     """
@@ -11,51 +10,60 @@ class AnnexeDetails(Recap):
     cles = ['invoice-year', 'invoice-month', 'invoice-ref', 'platf-name', 'client-code', 'client-name', 'oper-name',
             'oper-note', 'staff-note', 'mach-name', 'user-sciper', 'user-name', 'user-first', 'proj-nbr', 'proj-name',
             'item-nbr', 'item-name', 'item-unit', 'transac-date', 'transac-quantity', 'valuation-price',
-            'valuation-brut', 'discount-type', 'discount-CHF', 'valuation-net', 'subsid-code','subsid-name',
+            'valuation-brut', 'discount-type', 'discount-CHF', 'valuation-net', 'subsid-code', 'subsid-name',
             'subsid-start', 'subsid-end', 'subsid-ok', 'subsid-pourcent', 'subsid-maxproj', 'subsid-maxmois',
             'subsid-reste', 'subsid-CHF', 'deduct-CHF', 'subsid-deduct', 'total-fact', 'discount-bonus', 'subsid-bonus']
 
-    def __init__(self, edition):
+    def __init__(self, edition, paramtexte, paramannexe):
         """
         initialisation des données et stockage des paramètres d'édition
         :param edition: paramètres d'édition
+        :param paramtexte: paramètres textuels
+        :param paramannexe: paramètres d'annexe
         """
-        super().__init__(edition)
+        self.annee = edition.annee
+        self.mois = edition.mois
         self.version = edition.version
         self.unique = edition.client_unique
-        self.nom = ""
-        self.dossier = ""
-        self.chemin = "./"
-        self.prefixe = "Annexe-détails_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois) + "_" + \
-            str(edition.version)
+        self.paramtexte = paramtexte
+        self.paramannexe = paramannexe
 
-    def generer(self, trans_vals, paramtexte, paramannexe, par_client):
+    def generer(self, trans_vals, par_client):
         """
         génération des fichiers d'annexes détails à partir des transactions
         :param trans_vals: valeurs des transactions générées
-        :param paramtexte: paramètres textuels
-        :param paramannexe: paramètres d'annexe
         :param par_client: tri des transactions par client
         """
-        for donnee in paramannexe.donnees:
+        pt = self.paramtexte.donnees
+
+        prefixe = "Annexe-détails_" + str(self.annee) + "_" + Outils.mois_string(self.mois) + "_" + str(self.version)
+
+        chemin = "./"
+        for donnee in self.paramannexe.donnees:
             if donnee['nom'] == 'Annexe-détails':
-                self.chemin = donnee['chemin']
-                self.dossier = donnee['dossier']
-        dossier_destination = DossierDestination(self.chemin)
+                chemin = donnee['chemin']
+        dossier_destination = DossierDestination(chemin)
 
         for code in par_client.keys():
             if self.version > 0 and self.unique != code:
                 continue
             tbtr = par_client[code]['transactions']
             base = trans_vals[tbtr[0]]
-            self.nom = self.prefixe + "_" + code + "_" + base['client-name'] + ".csv"
-            self.valeurs = {}
+            nom = prefixe + "_" + code + "_" + base['client-name'] + ".csv"
             ii = 0
+            lignes = []
             for indice in tbtr:
                 val = trans_vals[indice]
-                donnee = []
+                ligne = [self.annee, self.mois]
                 for cle in range(2, len(self.cles)):
-                    donnee.append(val[self.cles[cle]])
-                self.ajouter_valeur(donnee, ii)
+                    ligne.append(val[self.cles[cle]])
+                lignes.append(ligne)
                 ii += 1
-            self.csv(dossier_destination, paramtexte)
+            with dossier_destination.writer(nom) as fichier_writer:
+                ligne = []
+                for cle in self.cles:
+                    ligne.append(pt[cle])
+                fichier_writer.writerow(ligne)
+
+                for ligne in lignes:
+                    fichier_writer.writerow(ligne)

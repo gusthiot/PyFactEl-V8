@@ -7,12 +7,11 @@ class BilanMensuel(object):
     """
 
     @staticmethod
-    def bilan(dossier_destination, edition, artsap, lignes):
+    def bilan(dossier_destination, edition, lignes):
         """
         création du bilan
         :param dossier_destination: Une instance de la classe dossier.DossierDestination
         :param edition: paramètres d'édition
-        :param artsap: articles SAP importés
         :param lignes: lignes de données du bilan
         """
 
@@ -23,25 +22,20 @@ class BilanMensuel(object):
 
         with dossier_destination.writer(nom) as fichier_writer:
 
-            ligne = ["année", "mois", "référence", "code client", "code client sap", "abrév. labo", "type client",
-                     "nature client", "", "", "", "", "-", "-", "DHt", "", "Rt", "Mt"]
-            for id_article in artsap.ids_d3:
-                article = artsap.donnees[id_article]
-                ligne.append(article['code_d'] + "t")
-            ligne += ["total facturé HT", "Bonus Ht"]
+            ligne = ["année", "mois", "référence", "code client", "code client sap", "abrév. labo", "nature client",
+                     "total facturé HT", "Bonus Ht"]
             fichier_writer.writerow(ligne)
 
             for ligne in lignes:
                 fichier_writer.writerow(ligne)
 
     @staticmethod
-    def creation_lignes(edition, sommes, clients, artsap, classes):
+    def creation_lignes(edition, sommes, clients, classes):
         """
         génération des lignes de données du bilan
         :param edition: paramètres d'édition
         :param sommes: sommes calculées
         :param clients: clients importés
-        :param artsap: articles SAP importés
         :param classes: classes clients importées
         :return: lignes de données du bilan
         """
@@ -60,13 +54,8 @@ class BilanMensuel(object):
             reference = ref_fact + str(edition.annee)[2:] + Outils.mois_string(edition.mois) + "." + code_client
             if edition.version > 0:
                 reference += "-" + str(edition.version)
-            rht = client['rh'] * scl['dht']
 
-            ligne = [edition.annee, edition.mois, reference, code_client, client['code_sap'], client['abrev_labo'], 'U',
-                     classe['code_n'], 0, 0, 0, 0, 0, 0, Outils.format_2_dec(rht), 0, Outils.format_2_dec(scl['r']),
-                     Outils.format_2_dec(scl['mt'])]
-            for id_article in artsap.ids_d3:
-                ligne.append(Outils.format_2_dec(scl['tot_cat'][id_article]))
-            ligne += [Outils.format_2_dec(scl['somme_t']), Outils.format_2_dec(scl['somme_t_mb'])]
+            ligne = [edition.annee, edition.mois, reference, code_client, client['code_sap'], client['abrev_labo'],
+                     classe['code_n'], Outils.format_2_dec(scl['somme_t']), Outils.format_2_dec(scl['somme_t_mb'])]
             lignes.append(ligne)
         return lignes
