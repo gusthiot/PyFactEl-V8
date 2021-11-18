@@ -27,6 +27,10 @@ class AnnexeDetails(object):
         self.unique = edition.client_unique
         self.paramtexte = paramtexte
         self.paramannexe = paramannexe
+        self.dossier = ""
+        self.chemin = "./"
+        self.prefixe = "Annexe-détails_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois) + "_" + \
+            str(edition.version)
 
     def generer(self, trans_vals, par_client):
         """
@@ -36,20 +40,18 @@ class AnnexeDetails(object):
         """
         pt = self.paramtexte.donnees
 
-        prefixe = "Annexe-détails_" + str(self.annee) + "_" + Outils.mois_string(self.mois) + "_" + str(self.version)
-
-        chemin = "./"
         for donnee in self.paramannexe.donnees:
             if donnee['nom'] == 'Annexe-détails':
-                chemin = donnee['chemin']
-        dossier_destination = DossierDestination(chemin)
+                self.chemin = donnee['chemin']
+                self.dossier = donnee['dossier']
+        dossier_destination = DossierDestination(self.chemin)
 
         for code in par_client.keys():
             if self.version > 0 and self.unique != code:
                 continue
             tbtr = par_client[code]['transactions']
             base = trans_vals[tbtr[0]]
-            nom = prefixe + "_" + code + "_" + base['client-name'] + ".csv"
+            nom = self.prefixe + "_" + code + "_" + base['client-name'] + ".csv"
             ii = 0
             lignes = []
             for indice in tbtr:

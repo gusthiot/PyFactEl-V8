@@ -25,6 +25,10 @@ class AnnexeSubsides(object):
         self.unique = edition.client_unique
         self.paramtexte = paramtexte
         self.paramannexe = paramannexe
+        self.dossier = ""
+        self.chemin = "./"
+        self.prefixe = "Annexe-subsides_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois) + "_" + \
+            str(edition.version)
 
     def generer(self, trans_vals, grants, plafonds, par_client, comptes, clients, subsides, artsap):
         """
@@ -40,12 +44,11 @@ class AnnexeSubsides(object):
         """
         pt = self.paramtexte.donnees
 
-        prefixe = "Annexe-subsides_" + str(self.annee) + "_" + Outils.mois_string(self.mois) + "_" + str(self.version)
-        chemin = "./"
         for donnee in self.paramannexe.donnees:
             if donnee['nom'] == 'Annexe-détails':
-                chemin = donnee['chemin']
-        dossier_destination = DossierDestination(chemin)
+                self.chemin = donnee['chemin']
+                self.dossier = donnee['dossier']
+        dossier_destination = DossierDestination(self.chemin)
 
         clients_comptes = {}
         for id_compte in comptes.donnees.keys():
@@ -81,7 +84,7 @@ class AnnexeSubsides(object):
             ii = 0
             lignes = []
             client = clients.donnees[code]
-            nom = prefixe + "_" + code + "_" + client['abrev_labo'] + ".csv"
+            nom = self.prefixe + "_" + code + "_" + client['abrev_labo'] + ".csv"
             for id_compte in cc:
                 compte = comptes.donnees[id_compte]
                 type_s = compte['type_subside']
