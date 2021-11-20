@@ -223,7 +223,7 @@ try:
     if prod2qual.actif:
         facture_qual = Facture(prod2qual)
         facture_qual.factures(sommes, dossier_destination, edition, generaux, clients, comptes, paramannexe, bilan_trs,
-                              artsap, classes)
+                              artsap, classes, paramtexte)
 
     bm_lignes = BilanMensuel.creation_lignes(edition, sommes, clients, classes)
     BilanMensuel.bilan(dossier_destination, edition, bm_lignes)

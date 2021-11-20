@@ -29,7 +29,7 @@ class StatUser(object):
         """
         pt = self.paramtexte.donnees
 
-        prefixe = "Stat-user_" + str(self.annee) + "_" + Outils.mois_string(self.mois) + ".csv"
+        prefixe = "Stat-user_" + str(self.annee) + "_" + Outils.mois_string(self.mois)
 
         for id_plate in par_plate.keys():
             lignes = []
@@ -50,7 +50,7 @@ class StatUser(object):
                     for indice in tbtr:
                         trans = trans_vals[indice]
                         stat_trans += 1
-                        if trans['transac-runcae'] == 1:
+                        if str(trans['transac-runcae']) == "1":
                             stat_run += 1
                     ligne += [stat_trans, stat_run]
                     lignes.append(ligne)

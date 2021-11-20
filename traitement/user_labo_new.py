@@ -18,6 +18,7 @@ class UserLaboNew(object):
         self.annee = edition.annee
         self.mois = edition.mois
         self.paramtexte = paramtexte
+        self.valeurs = {}
 
     def generer(self, trans_vals, dossier_destination, par_plate, userlabs):
         """
@@ -31,7 +32,6 @@ class UserLaboNew(object):
 
         nom = "User-labo_" + str(self.annee) + "_" + Outils.mois_string(self.mois) + ".csv"
 
-        lignes = []
         for donnee in userlabs.donnees:
             year, info = Outils.est_un_entier(donnee['year'], "l'année", min=2000, max=2099)
             if info != "":
@@ -46,10 +46,11 @@ class UserLaboNew(object):
             if self.annee - year == 1:
                 if self.mois - month > -1:
                     continue
-            ligne = []
+            valeur = []
             for i in range(0, len(self.cles)):
-                ligne.append(donnee[self.cles[i]])
-            lignes.append(ligne)
+                valeur.append(donnee[self.cles[i]])
+            self.ajouter_valeur(valeur, donnee['year'] + donnee['month'] + donnee['day'] + donnee['user-id'] +
+                                donnee['client-code'])
 
         for id_plate in par_plate.keys():
             par_user = par_plate[id_plate]['users']
@@ -63,15 +64,15 @@ class UserLaboNew(object):
                         date, info = Outils.est_une_date(trans['transac-date'], "la date de transaction")
                         if info != "":
                             Outils.affiche_message(info)
-                        ligne = [self.annee, self.mois]
+                        valeur = [self.annee, self.mois]
                         for cle in range(2, len(self.cles)):
                             if self.cles[cle] == 'day':
-                                ligne.append(date.day)
+                                valeur.append(date.day)
                             elif self.cles[cle] == 'week-nbr':
-                                ligne.append(date.isocalendar()[1])
+                                valeur.append(date.isocalendar()[1])
                             else:
-                                ligne.append(trans[self.cles[cle]])
-                        lignes.append(ligne)
+                                valeur.append(trans[self.cles[cle]])
+                        self.ajouter_valeur(valeur, str(self.annee) + str(self.mois) + str(date.day) + id_user + code)
 
         with dossier_destination.writer(nom) as fichier_writer:
             ligne = []
@@ -79,5 +80,20 @@ class UserLaboNew(object):
                 ligne.append(pt[cle])
             fichier_writer.writerow(ligne)
 
-            for ligne in lignes:
+            for key in self.valeurs.keys():
+                valeur = self.valeurs[key]
+                ligne = []
+                for i in range(0, len(self.cles)):
+                    ligne.append(valeur[self.cles[i]])
                 fichier_writer.writerow(ligne)
+
+    def ajouter_valeur(self, donnee, unique):
+        """
+        ajout d'une ligne au prototype de csv
+        :param donnee: contenu de la ligne
+        :param unique: clé d'identification unique de la ligne
+        """
+        valeur = {}
+        for i in range(0, len(donnee)):
+            valeur[self.cles[i]] = donnee[i]
+        self.valeurs[unique] = valeur

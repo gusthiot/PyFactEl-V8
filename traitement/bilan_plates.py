@@ -37,7 +37,7 @@ class BilanPlates(object):
         for id_plate in par_plate.keys():
             par_client = par_plate[id_plate]['clients']
             for code in par_client.keys():
-                par_code = par_client[code]
+                par_code = par_client[code]['articles']
                 for code_d in par_code.keys():
                     tbtr = par_code[code_d]
                     base = trans_vals[tbtr[0]]

@@ -87,8 +87,9 @@ class BilansTransacts(object):
 
             ppc = par_plate[id_plateforme]['clients']
             if code_client not in ppc.keys():
-                ppc[code_client] = {}
-            ppcd = ppc[code_client]
+                ppc[code_client] = {'articles': {}, 'transactions': []}
+            ppc[code_client]['transactions'].append(key)
+            ppcd = ppc[code_client]['articles']
             if id_article not in ppcd.keys():
                 ppcd[id_article] = [key]
             else:
@@ -111,9 +112,11 @@ class BilansTransacts(object):
 
             ppm = par_plate[id_plateforme]['machines']
             if id_machine not in ppm.keys():
-                ppm[id_machine] = [key]
+                ppm[id_machine] = {}
+            if item not in ppm[id_machine].keys():
+                ppm[id_machine][item] = [key]
             else:
-                ppm[id_machine].append(key)  # => stat machine
+                ppm[id_machine][item].append(key)  # => stat machine
 
             ppu = par_plate[id_plateforme]['users']
             if user_id not in ppu.keys():
@@ -131,8 +134,51 @@ class BilansTransacts(object):
         self.bil_plat.generer(trans_vals, dossier_destination, par_plate)
         self.bil_use.generer(trans_vals, dossier_destination, par_plate)
         self.bil_conso.generer(trans_vals, dossier_destination, par_plate)
-        self.usr_lab.generer(trans_vals, dossier_destination, par_plate, userlabs)
         self.stat_user.generer(trans_vals, dossier_destination, par_plate)
-        self.stat_nb_user.generer(trans_vals, dossier_destination)
-        self.stat_cli.generer(trans_vals, dossier_destination)
         self.stat_mach.generer(trans_vals, dossier_destination, par_plate)
+        self.usr_lab.generer(trans_vals, dossier_destination, par_plate, userlabs)
+
+        par_plate_ul = {}
+        for jour in self.usr_lab.valeurs.keys():
+            valeur = self.usr_lab.valeurs[jour]
+            id_plateforme = valeur['platf-code']
+            if id_plateforme not in par_plate_ul.keys():
+                par_plate_ul[id_plateforme] = {'annees': {}, 'semaines': {}, 'nom': valeur['platf-name']}
+            pp = par_plate_ul[id_plateforme]
+            if pp['nom'] == "" and valeur['platf-name'] != "":
+                pp['nom'] = valeur['platf-name']
+            annee, info = Outils.est_un_entier(valeur['year'], "l'année", min=2000, max=2099)
+            if info != "":
+                Outils.affiche_message(info)
+            mois, info = Outils.est_un_entier(valeur['month'], "le mois", min=1, max=12)
+            if info != "":
+                Outils.affiche_message(info)
+            if annee not in pp['annees']:
+                pp['annees'][annee] = {}
+            if mois not in pp['annees'][annee]:
+                pp['annees'][annee][mois] = {'users': [], 'jours': {}, 'clients': {}}
+            pm = pp['annees'][annee][mois]
+            jour = valeur['day']
+            if jour not in pm['jours']:
+                pm['jours'][jour] = []
+            code = valeur['client-code']
+            if code not in pm['clients']:
+                pm['clients'][code] = []
+
+            semaine = valeur['week-nbr']
+            if semaine not in pp['semaines']:
+                pp['semaines'][semaine] = []
+
+            user = valeur['user-id']
+            if id_plateforme != valeur['client-code']:
+                if user not in pm['jours'][jour]:
+                    pm['jours'][jour].append(user)
+                if user not in pm['users']:
+                    pm['users'].append(user)
+                if user not in pp['semaines'][semaine]:
+                    pp['semaines'][semaine].append(user)
+            if user not in pm['clients'][code]:
+                pm['clients'][code].append(user)
+
+        self.stat_nb_user.generer(dossier_destination, par_plate_ul)
+        self.stat_cli.generer(trans_vals, dossier_destination, par_plate, par_plate_ul)
