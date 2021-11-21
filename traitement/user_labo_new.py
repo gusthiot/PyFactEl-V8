@@ -31,7 +31,7 @@ class UserLaboNew(object):
         pt = self.paramtexte.donnees
 
         nom = "User-labo_" + str(self.annee) + "_" + Outils.mois_string(self.mois) + ".csv"
-
+        keys = []
         for donnee in userlabs.donnees:
             year, info = Outils.est_un_entier(donnee['year'], "l'année", min=2000, max=2099)
             if info != "":
@@ -49,8 +49,15 @@ class UserLaboNew(object):
             valeur = []
             for i in range(0, len(self.cles)):
                 valeur.append(donnee[self.cles[i]])
-            self.ajouter_valeur(valeur, donnee['year'] + donnee['month'] + donnee['day'] + donnee['user-id'] +
-                                donnee['client-code'])
+            key = donnee['year'] + donnee['month'] + donnee['day'] + donnee['user-id'] + donnee['client-code'] + \
+                donnee['platf-code']
+            if key not in keys:
+                keys.append(key)
+            else:
+                print("doublon", key)
+                print(valeur)
+                print(self.valeurs[key])
+            self.ajouter_valeur(valeur, key)
 
         for id_plate in par_plate.keys():
             par_user = par_plate[id_plate]['users']
@@ -72,7 +79,8 @@ class UserLaboNew(object):
                                 valeur.append(date.isocalendar()[1])
                             else:
                                 valeur.append(trans[self.cles[cle]])
-                        self.ajouter_valeur(valeur, str(self.annee) + str(self.mois) + str(date.day) + id_user + code)
+                        self.ajouter_valeur(valeur, str(self.annee) + str(self.mois) + str(date.day) + id_user +
+                                            code + id_plate)
 
         with dossier_destination.writer(nom) as fichier_writer:
             ligne = []
