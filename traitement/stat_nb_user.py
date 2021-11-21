@@ -61,7 +61,7 @@ class StatNbUser(object):
                             mo = 12 + self.mois - gap
                             an = self.annee - 1
                         if mo in pp['annees'][an]:
-                            ids = pp['annees'][self.annee][self.mois]['users']
+                            ids = pp['annees'][an][mo]['users']
                             for idd in ids:
                                 if gap < 3 and idd not in user_3m:
                                     user_3m.append(idd)
@@ -69,6 +69,7 @@ class StatNbUser(object):
                                     user_6m.append(idd)
                                 if idd not in user_12m:
                                     user_12m.append(idd)
+
                     nb_user_3m = len(user_3m)
                     nb_user_6m = len(user_6m)
                     nb_user_12m = len(user_12m)

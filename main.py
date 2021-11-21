@@ -208,6 +208,8 @@ try:
     bilan_trs.generer(trans_vals, grants, plafonds, comptes, clients, subsides, artsap, userlabs,
                       DossierDestination(dossier_enregistrement))
 
+    sys.exit()
+
     # faire les annexes avant la facture, que le ticket puisse vérifier leur existence
     if Latex.possibles():
         Annexes.annexes(sommes, clients, edition, livraisons, acces, machines, comptes, paramannexe, generaux, users,
