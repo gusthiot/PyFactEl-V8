@@ -50,9 +50,9 @@ class StatNbUser(object):
                         nb_user_d = len(pm['jours'][jour])
                 if jour == nb_de_jours:
                     nb_user_m = len(pmu)
-                    user_3m = pmu
-                    user_6m = pmu
-                    user_12m = pmu
+                    user_3m = pmu.copy()
+                    user_6m = pmu.copy()
+                    user_12m = pmu.copy()
                     for gap in range(1, 12):
                         if gap < self.mois:
                             mo = self.mois - gap

@@ -37,7 +37,8 @@ class StatClient(object):
             if self.mois in pp['annees'][self.annee]:
                 pm = pp['annees'][self.annee][self.mois]['clients']
                 for code in pm:
-                    stats_clients[code] = {'1m': len(pm[code]), '3m': pm[code], '6m': pm[code], '12m': pm[code]}
+                    stats_clients[code] = {'1m': len(pm[code]), '3m': pm[code].copy(), '6m': pm[code].copy(),
+                                           '12m': pm[code].copy()}
             for gap in range(1, 12):
                 if gap < self.mois:
                     mo = self.mois - gap

@@ -139,8 +139,8 @@ class BilansTransacts(object):
         self.usr_lab.generer(trans_vals, dossier_destination, par_plate, userlabs)
 
         par_plate_ul = {}
-        for jour in self.usr_lab.valeurs.keys():
-            valeur = self.usr_lab.valeurs[jour]
+        for gross_key in self.usr_lab.valeurs.keys():
+            valeur = self.usr_lab.valeurs[gross_key]
             id_plateforme = valeur['platf-code']
             if id_plateforme not in par_plate_ul.keys():
                 par_plate_ul[id_plateforme] = {'annees': {}, 'semaines': {}, 'nom': valeur['platf-name']}
@@ -158,25 +158,26 @@ class BilansTransacts(object):
             if mois not in pp['annees'][annee]:
                 pp['annees'][annee][mois] = {'users': [], 'jours': {}, 'clients': {}}
             pm = pp['annees'][annee][mois]
-            jour = valeur['day']
-            if jour not in pm['jours']:
-                pm['jours'][jour] = []
             code = valeur['client-code']
-            if code not in pm['clients']:
-                pm['clients'][code] = []
-
-            semaine = valeur['week-nbr']
-            if semaine not in pp['semaines']:
-                pp['semaines'][semaine] = []
 
             user = valeur['user-id']
-            if id_plateforme != valeur['client-code']:
-                if user not in pm['jours'][jour]:
-                    pm['jours'][jour].append(user)
+            if id_plateforme != code:
+                if mois == self.usr_lab.mois:
+                    jour = valeur['day']
+                    if jour not in pm['jours']:
+                        pm['jours'][jour] = []
+                    if user not in pm['jours'][jour]:
+                        pm['jours'][jour].append(user)
                 if user not in pm['users']:
                     pm['users'].append(user)
+                semaine = valeur['week-nbr']
+                if semaine not in pp['semaines']:
+                    pp['semaines'][semaine] = []
                 if user not in pp['semaines'][semaine]:
                     pp['semaines'][semaine].append(user)
+
+            if code not in pm['clients']:
+                pm['clients'][code] = []
             if user not in pm['clients'][code]:
                 pm['clients'][code].append(user)
 
