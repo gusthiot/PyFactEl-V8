@@ -46,18 +46,19 @@ class StatClient(object):
                 else:
                     mo = 12 + self.mois - gap
                     an = self.annee - 1
-                if mo in pp['annees'][an]:
-                    pm = pp['annees'][an][mo]['clients']
-                    for code in pm:
-                        if code not in stats_clients:
-                            stats_clients[code] = {'1m': 0, '3m': [], '6m': [], '12m': []}
-                        for idd in pm[code]:
-                            if gap < 3 and idd not in stats_clients[code]['3m']:
-                                stats_clients[code]['3m'].append(idd)
-                            if gap < 6 and idd not in stats_clients[code]['6m']:
-                                stats_clients[code]['6m'].append(idd)
-                            if id not in stats_clients[code]['12m']:
-                                stats_clients[code]['12m'].append(idd)
+                if an in pp['annees']:
+                    if mo in pp['annees'][an]:
+                        pm = pp['annees'][an][mo]['clients']
+                        for code in pm:
+                            if code not in stats_clients:
+                                stats_clients[code] = {'1m': 0, '3m': [], '6m': [], '12m': []}
+                            for idd in pm[code]:
+                                if gap < 3 and idd not in stats_clients[code]['3m']:
+                                    stats_clients[code]['3m'].append(idd)
+                                if gap < 6 and idd not in stats_clients[code]['6m']:
+                                    stats_clients[code]['6m'].append(idd)
+                                if id not in stats_clients[code]['12m']:
+                                    stats_clients[code]['12m'].append(idd)
 
             lignes = []
             plate_name = ""

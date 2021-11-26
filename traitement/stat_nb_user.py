@@ -60,15 +60,16 @@ class StatNbUser(object):
                         else:
                             mo = 12 + self.mois - gap
                             an = self.annee - 1
-                        if mo in pp['annees'][an]:
-                            ids = pp['annees'][an][mo]['users']
-                            for idd in ids:
-                                if gap < 3 and idd not in user_3m:
-                                    user_3m.append(idd)
-                                if gap < 6 and idd not in user_6m:
-                                    user_6m.append(idd)
-                                if idd not in user_12m:
-                                    user_12m.append(idd)
+                        if an in pp['annees']:
+                            if mo in pp['annees'][an]:
+                                ids = pp['annees'][an][mo]['users']
+                                for idd in ids:
+                                    if gap < 3 and idd not in user_3m:
+                                        user_3m.append(idd)
+                                    if gap < 6 and idd not in user_6m:
+                                        user_6m.append(idd)
+                                    if idd not in user_12m:
+                                        user_12m.append(idd)
 
                     nb_user_3m = len(user_3m)
                     nb_user_6m = len(user_6m)
@@ -76,8 +77,11 @@ class StatNbUser(object):
                 date = datetime(self.annee, self.mois, jour)
                 semaine = date.isocalendar()[1]
                 nb_user_w = ""
-                if date.weekday() == 6 and semaine in pp['semaines']:
-                    nb_user_w = len(pp['semaines'][semaine])
+                if date.weekday() == 6:
+                    if semaine in pp['semaines']:
+                        nb_user_w = len(pp['semaines'][semaine])
+                    else:
+                        nb_user_w = 0
                 ligne = [self.annee, self.mois, jour, semaine, nb_user_d, nb_user_w, nb_user_m, nb_user_3m, nb_user_6m,
                          nb_user_12m]
                 lignes.append(ligne)
