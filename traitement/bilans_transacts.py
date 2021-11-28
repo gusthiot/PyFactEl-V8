@@ -163,14 +163,18 @@ class BilansTransacts(object):
             user = valeur['user-id']
             if id_plateforme != code:
                 if mois == self.usr_lab.mois:
-                    jour = valeur['day']
+                    jour, info = Outils.est_un_entier(valeur['day'], "le jour", min=1, max=31)
+                    if info != "":
+                        Outils.affiche_message(info)
                     if jour not in pm['jours']:
                         pm['jours'][jour] = []
                     if user not in pm['jours'][jour]:
                         pm['jours'][jour].append(user)
                 if user not in pm['users']:
                     pm['users'].append(user)
-                semaine = valeur['week-nbr']
+                semaine, info = Outils.est_un_entier(valeur['week-nbr'], "la semaine", min=1, max=60)
+                if info != "":
+                    Outils.affiche_message(info)
                 if semaine not in pp['semaines']:
                     pp['semaines'][semaine] = []
                 if user not in pp['semaines'][semaine]:
