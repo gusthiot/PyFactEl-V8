@@ -57,7 +57,7 @@ class StatClient(object):
                                     stats_clients[code]['3m'].append(idd)
                                 if gap < 6 and idd not in stats_clients[code]['6m']:
                                     stats_clients[code]['6m'].append(idd)
-                                if id not in stats_clients[code]['12m']:
+                                if idd not in stats_clients[code]['12m']:
                                     stats_clients[code]['12m'].append(idd)
 
             lignes = []
