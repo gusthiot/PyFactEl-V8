@@ -55,6 +55,7 @@ class BilansTransacts(object):
             id_compte = transaction['proj-id']
             id_plateforme = transaction['platf-code']
             id_article = transaction['item-idsap']
+            code_d = transaction['item-codeD']
             id_projet = transaction['proj-id']
             item = transaction['item-id']
             id_machine = transaction['mach-id']
@@ -90,10 +91,10 @@ class BilansTransacts(object):
                 ppc[code_client] = {'articles': {}, 'transactions': []}
             ppc[code_client]['transactions'].append(key)
             ppcd = ppc[code_client]['articles']
-            if id_article not in ppcd.keys():
-                ppcd[id_article] = [key]
+            if code_d not in ppcd.keys():
+                ppcd[code_d] = [key]
             else:
-                ppcd[id_article].append(key)  # => bilan plates
+                ppcd[code_d].append(key)  # => bilan plates
 
             ppi = par_plate[id_plateforme]['items']
             if item not in ppi.keys():
