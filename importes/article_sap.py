@@ -7,8 +7,8 @@ class ArticleSap(Fichier):
     Classe pour l'importation des données des Articles SAP
     """
 
-    cles = ['id_article', 'flux', 'code_d', 'intitule_long', 'intitule_court', 'code_sap', 'code_sap_qas', 'quantite',
-            'unite', 'type_prix', 'type_rabais', 'texte_sap']
+    cles = ['id_article', 'code_d', 'flag_usage', 'flag_conso', 'intitule_long', 'intitule_court', 'code_sap',
+            'code_sap_qas', 'quantite', 'unite', 'type_prix', 'type_rabais', 'texte_sap']
     nom_fichier = "articlesap.csv"
     libelle = "Articles SAP"
 
@@ -19,23 +19,18 @@ class ArticleSap(Fichier):
         self.ids_d3 = []
         self.ids = []
 
-    def contient_id(self, id_article, flux=None):
+    def contient_id(self, id_article):
         """
-        vérifie si un article contient l'id donné, voire s'il est dans le(s) flux donné(s)
+        vérifie si un article contient l'id donné
         :param id_article: id à vérifier
-        :param flux: tableau de flux, facultatif
         :return: 1 si id contenu, 0 sinon
         """
         if self.verifie_coherence == 1:
             if id_article in self.donnees.keys():
-                if flux is not None and self.donnees[id_article]['flux'] not in flux:
-                    return 0
                 return 1
         else:
             for article in self.donnees:
                 if article['id_article'] == id_article:
-                    if flux is not None and article['flux'] not in flux:
-                        return 0
                     return 1
         return None
 
@@ -85,15 +80,19 @@ class ArticleSap(Fichier):
             msg += info
             donnee['texte_sap'], info = Outils.est_un_texte(donnee['texte_sap'], "le texte sap", ligne, True)
             msg += info
+            if donnee['flag_usage'] != 'OUI' and donnee['flag_usage'] != 'NON':
+                msg += "le flag usage de la ligne " + str(ligne) + " doit être OUI ou NON\n"
+            if donnee['flag_conso'] != 'OUI' and donnee['flag_conso'] != 'NON':
+                msg += "le flag conso de la ligne " + str(ligne) + " doit être OUI ou NON\n"
 
-            if donnee['flux'] == 'lvr':
+            if donnee['code_d'] == 'C' or donnee['code_d'] == 'X':
                 self.ids_d3.append(donnee['id_article'])
-            elif donnee['flux'] == 'cae':
+            elif donnee['code_d'] == 'M':
                 self.id_d1 = donnee['id_article']
-            elif donnee['flux'] == 'noshow':
+            elif donnee['code_d'] == 'R':
                 self.id_d2 = donnee['id_article']
             else:
-                msg += "le flux de la ligne " + str(ligne) + " doit être cae, noshow ou lvr\n"
+                msg += "le code D de la ligne " + str(ligne) + " doit être M, R, C ou X\n"
 
             donnees_dict[donnee['id_article']] = donnee
             ligne += 1

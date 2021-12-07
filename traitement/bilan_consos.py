@@ -40,7 +40,7 @@ class BilanConsos(object):
                 for item in par_item.keys():
                     tbtr = par_item[item]
                     base = trans_vals[tbtr[0]]
-                    if base['item-type'] == pt['item-good']:
+                    if base['item-flag-conso'] == "OUI":
                         ligne = [self.annee, self.mois]
                         for cle in range(2, len(self.cles) - 4):
                             ligne.append(base[self.cles[cle]])

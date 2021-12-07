@@ -84,7 +84,7 @@ class BilanPlates(object):
                     op = base['platf-op'] + base['client-class'] + str(self.annee)[2:4] + \
                         Outils.mois_string(self.mois) + code_d
                     ligne += [round(avant, 2), round(compris, 2), round(deduit, 2), round(sub_ded, 2), round(fact, 2),
-                               round(remb, 2), round(sub_remb, 2), op]
+                              round(remb, 2), round(sub_remb, 2), op]
                     lignes.append(ligne)
                     ii += 1
 

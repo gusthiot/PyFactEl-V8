@@ -38,7 +38,7 @@ class BilanUsages(object):
             for item in par_item.keys():
                 tbtr = par_item[item]
                 base = trans_vals[tbtr[0]]
-                if base['item-type'] == pt['item-service']:
+                if base['item-flag-usage'] == "OUI":
                     ligne = [self.annee, self.mois]
                     for cle in range(2, len(self.cles)-5):
                         ligne.append(base[self.cles[cle]])

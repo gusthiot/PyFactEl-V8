@@ -7,7 +7,7 @@ class StatMachine(object):
     Classe pour la création du csv des stats nombre user
     """
 
-    cles = ['invoice-year', 'invoice-month', 'mach-id', 'mach-name', 'item-id', 'item-type', 'item-codeK', 'item-textK',
+    cles = ['invoice-year', 'invoice-month', 'mach-id', 'mach-name', 'item-id', 'flow-type', 'item-codeK', 'item-textK',
             'item-nbr', 'item-name', 'item-unit', 'transac-quantity', 'transac-usage', 'transac-runtime', 'runtime-N',
             'runtime-avg', 'runtime-stddev']
 

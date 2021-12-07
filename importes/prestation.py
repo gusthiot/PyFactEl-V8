@@ -94,9 +94,8 @@ class Prestation(Fichier):
 
             if donnee['id_article'] == "":
                 msg += "l'id article SAP  de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif not artsap.contient_id(donnee['id_article'], ['lvr']):
-                msg += "l'id article SAP '" + donnee['id_article'] + "' de la ligne " + str(ligne) +\
-                       " n'existe pas dans les paramètres D3\n"
+            elif not artsap.contient_id(donnee['id_article']):
+                msg += "l'id article SAP de la ligne " + str(ligne) + " n'existe pas dans les codes D\n"
             elif coefprests.contient_article(donnee['id_article']) == 0:
                 msg += "l'id article SAP' '" + donnee['id_article'] + "' de la ligne " + str(ligne) +\
                        " n'est pas référencée dans les coefficients\n"

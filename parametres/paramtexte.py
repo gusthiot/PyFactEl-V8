@@ -11,17 +11,19 @@ class Paramtexte(object):
             'platf-name', 'platf-cf', 'platf-fund', 'client-code', 'client-sap', 'client-name',
             'client-idclass', 'client-class', 'client-labelclass', 'oper-id', 'oper-name', 'oper-note', 'oper-PO',
             'staff-note', 'mach-id', 'mach-name', 'mach-extra', 'user-id', 'user-sciper', 'user-name', 'user-first',
-            'proj-id', 'proj-nbr', 'proj-name', 'proj-expl', 'item-id', 'item-idsap', 'item-type', 'item-penalty',
-            'item-service', 'item-good', 'item-nbr', 'item-name', 'item-unit', 'item-codeD', 'item-labelcode',
-            'item-sap', 'item-extra', 'transac-date', 'transac-usage', 'transac-runtime', 'transac-runcae',
-            'valuation-price', 'valuation-brut', 'discount-type', 'discount-HC', 'discount-LVR', 'discount-CHF',
-            'deduct-CHF', 'valuation-net', 'subsid-code', 'subsid-name', 'subsid-start', 'subsid-end', 'subsid-ok',
-            'subsid-pourcent', 'subsid-maxproj', 'subsid-maxmois', 'subsid-reste', 'subsid-CHF', 'subsid-deduct',
-            'discount-bonus', 'subsid-bonus', 'total-fact', 'OP-code', 'runtime-N', 'runtime-avg', 'runtime-stddev',
+            'proj-id', 'proj-nbr', 'proj-name', 'proj-expl', 'flow-type', 'flow-cae', 'flow-noshow', 'flow-lvr',
+            'flow-srv', 'item-id', 'item-idsap', 'item-codeK', 'item-textK', 'item-K1a', 'item-K1b', 'item-K2',
+            'item-K3', 'item-K4', 'item-K5', 'item-K6', 'item-K7', 'item-nbr', 'item-name', 'item-unit', 'item-codeD',
+            'item-flag-usage', 'item-flag-conso', 'item-labelcode', 'item-sap', 'item-extra', 'transac-date',
+            'transac-quantity', 'transac-usage', 'transac-runtime', 'transac-runcae', 'valuation-price',
+            'valuation-brut', 'discount-type', 'discount-HC', 'discount-LVR', 'discount-CHF', 'deduct-CHF',
+            'valuation-net', 'subsid-code', 'subsid-name', 'subsid-start', 'subsid-end', 'subsid-ok', 'subsid-pourcent',
+            'subsid-maxproj', 'subsid-maxmois', 'subsid-reste', 'subsid-CHF', 'subsid-deduct', 'discount-bonus',
+            'subsid-bonus', 'total-fact', 'OP-code', 'runtime-N', 'runtime-avg', 'runtime-stddev',
             'conso-propre-march-expl', 'conso-propre-extra-expl', 'conso-propre-march-proj', 'conso-propre-extra-proj',
             'year', 'month', 'day', 'week-nbr', 'subsid-alrdygrant', 'your-ref', 'stat-nbuser-d', 'stat-nbuser-w',
-            'stat-nbuser-m', 'stat-nbuser-3m', 'stat-nbuser-6m', 'stat-nbuser-12m', 'stat-trans',
-            'stat-run', 'stat-hmach']
+            'stat-nbuser-m', 'stat-nbuser-3m', 'stat-nbuser-6m', 'stat-nbuser-12m', 'stat-trans', 'stat-run',
+            'stat-hmach']
     nom_fichier = "paramtext.csv"
     libelle = "Paramètres de Texte"
 

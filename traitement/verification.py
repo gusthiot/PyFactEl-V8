@@ -13,7 +13,8 @@ class Verification(object):
         """
         self.a_verifier = 2
 
-    def verification_date(self, edition, acces, clients, comptes, livraisons, machines, noshows, prestations, users):
+    def verification_date(self, edition, acces, clients, comptes, livraisons, machines, noshows, prestations, users,
+                          services):
         """
         vérifie les dates de toutes les données importées
         :param edition: paramètres d'édition
@@ -25,6 +26,7 @@ class Verification(object):
         :param noshows: no show importés
         :param prestations: prestations importées
         :param users: users importés
+        :param services: services importés
         :return: 0 si ok, sinon le nombre d'échecs à la vérification
         """
         verif = 0
@@ -36,12 +38,13 @@ class Verification(object):
         verif += prestations.verification_date(edition.annee, edition.mois)
         verif += users.verification_date(edition.annee, edition.mois)
         verif += noshows.verification_date(edition.annee, edition.mois)
+        verif += services.verification_date(edition.annee, edition.mois)
         self.a_verifier = 1
         return verif
 
     def verification_coherence(self, generaux, edition, acces, categories, categprix, clients, coefprests, comptes,
                                grants, livraisons, machines, noshows, plafonds, plateformes, prestations, subsides,
-                               users, docpdf, groupes, cles, classes, artsap, userlabs):
+                               users, docpdf, groupes, cles, classes, artsap, userlabs, services):
         """
         vérifie la cohérence des données importées
         :param generaux: paramètres généraux
@@ -67,6 +70,7 @@ class Verification(object):
         :param classes: classes clients importées
         :param artsap: articles sap importés
         :param userlabs: users labo importés
+        :param services: services importés
         :return: 0 si ok, sinon le nombre d'échecs à la vérification
         """
         verif = 0
@@ -92,11 +96,12 @@ class Verification(object):
         verif += acces.est_coherent(comptes, machines, users)
         verif += noshows.est_coherent(comptes, machines, users)
         verif += livraisons.est_coherent(comptes, prestations, users)
+        verif += services.est_coherent(comptes, categories, users)
 
         if verif > 0:
             return verif
 
-        comptes_actifs = Verification.obtenir_comptes_actifs(acces, livraisons, noshows)
+        comptes_actifs = Verification.obtenir_comptes_actifs(acces, livraisons, noshows, services)
         clients_actifs = Verification.obtenir_clients_actifs(comptes_actifs, comptes)
 
         if edition.version > 0 and len(clients_actifs) > 0:
@@ -111,12 +116,13 @@ class Verification(object):
         return verif
 
     @staticmethod
-    def obtenir_comptes_actifs(acces, livraisons, noshows):
+    def obtenir_comptes_actifs(acces, livraisons, noshows, services):
         """
         retourne la liste des comptes utilisés, pour les accès et les livraisons
         :param acces: accès importés
         :param livraisons: livraisons importées
         :param noshows: noshows importés
+        :param services: services importés
         :return: comptes utilisés mappés par clients
         """
         comptes_actifs = []
@@ -127,6 +133,9 @@ class Verification(object):
             if id_compte not in comptes_actifs:
                 comptes_actifs.append(id_compte)
         for id_compte in noshows.obtenir_comptes():
+            if id_compte not in comptes_actifs:
+                comptes_actifs.append(id_compte)
+        for id_compte in services.obtenir_comptes():
             if id_compte not in comptes_actifs:
                 comptes_actifs.append(id_compte)
 

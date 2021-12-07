@@ -59,8 +59,8 @@ class Categorie(Fichier):
 
             if donnee['id_article'] == "":
                 msg += "l'id d'article SAP de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif not artsap.contient_id(donnee['id_article'], ['cae', 'noshow']):
-                msg += "l'id d'article SAP de la ligne " + str(ligne) + " n'est pas un code D1 ou D2\n"
+            elif not artsap.contient_id(donnee['id_article']):
+                msg += "l'id article SAP de la ligne " + str(ligne) + " n'existe pas dans les codes D\n"
 
             if donnee['id_plateforme'] == "":
                 msg += "l'id plateforme de la ligne " + str(ligne) + " ne peut être vide\n"

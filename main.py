@@ -36,6 +36,7 @@ from importes import (Client,
                       UserLabo,
                       PlafSubside,
                       Plateforme,
+                      Service,
                       Subside,
                       CleSubside,
                       DossierSource,
@@ -102,6 +103,7 @@ try:
     users = User(dossier_source)
     classes = ClasseClient(dossier_source)
     artsap = ArticleSap(dossier_source)
+    services = Service(dossier_source)
 
     if Outils.existe(Outils.chemin([dossier_data, DocPdf.nom_fichier])):
         docpdf = DocPdf(dossier_source)
@@ -112,13 +114,13 @@ try:
 
     verification = Verification()
     if verification.verification_date(edition, acces, clients, comptes, livraisons, machines, noshows, prestations,
-                                      users) > 0:
+                                      users, services) > 0:
         sys.exit("Erreur dans les dates")
 
     if verification.verification_coherence(generaux, edition, acces, categories, categprix, clients, coefprests,
                                            comptes, grants, livraisons, machines, noshows, plafonds, plateformes,
                                            prestations, subsides, users, docpdf, groupes, cles, classes, artsap,
-                                           userlabs) > 0:
+                                           userlabs, services) > 0:
         sys.exit("Erreur dans la cohérence")
 
     ## génération du dossier destination
@@ -151,13 +153,13 @@ try:
 
     ## copie des fichiers bruts
 
-    for fichier in [acces.nom_fichier, clients.nom_fichier, coefprests.nom_fichier, comptes.nom_fichier,
-                    livraisons.nom_fichier, machines.nom_fichier, prestations.nom_fichier, categories.nom_fichier,
-                    users.nom_fichier, generaux.nom_fichier, grants.nom_fichier, edition.nom_fichier,
-                    categprix.nom_fichier, paramannexe.nom_fichier, noshows.nom_fichier, plafonds.nom_fichier,
-                    plateformes.nom_fichier, subsides.nom_fichier, paramtexte.nom_fichier, groupes.nom_fichier,
-                    cles.nom_fichier, artsap.nom_fichier, classes.nom_fichier, userlabs.nom_fichier]:
-        dossier_destination.ecrire(fichier, dossier_source.lire(fichier))
+    for fichier in [acces, clients, coefprests, comptes,
+                    livraisons, machines, prestations, categories,
+                    users, generaux, grants, edition,
+                    categprix, paramannexe, noshows, plafonds,
+                    plateformes, subsides, paramtexte, groupes,
+                    cles, artsap, classes, userlabs, services]:
+        dossier_destination.ecrire(fichier.nom_fichier, dossier_source.lire(fichier.nom_fichier))
     if docpdf is not None:
         dossier_destination.ecrire(docpdf.nom_fichier, dossier_source.lire(docpdf.nom_fichier))
 
@@ -179,14 +181,15 @@ try:
     ## traitement
 
     articles = Articles(edition)
-    articles.generer(artsap, categories, prestations, paramtexte)
+    articles.generer(artsap, categories, prestations)
     articles.csv(dossier_destination, paramtexte)
     tarifs = Tarifs(edition)
     tarifs.generer(classes, categories, prestations, categprix, coefprests)
     tarifs.csv(dossier_destination, paramtexte)
     transactions = Transactions(edition)
-    transactions.generer(acces, noshows, livraisons, prestations, machines, categprix, comptes, clients, users,
-                         plateformes, classes, articles, tarifs, subsides, plafonds, grants, groupes, cles, paramtexte)
+    transactions.generer(acces, noshows, livraisons, services, prestations, machines, categprix, comptes, clients,
+                         users, plateformes, classes, articles, tarifs, subsides, plafonds, grants, groupes, cles,
+                         paramtexte)
     transactions.csv(dossier_destination, paramtexte)
 
     new_grants = GrantedNew(edition)

@@ -62,9 +62,8 @@ class CoefPrest(Fichier):
 
             if donnee['id_article'] == "":
                 msg += "l'id article SAP de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif not artsap.contient_id(donnee['id_article'], ['lvr']):
-                msg += "l'id d'article SAP '" + donnee['id_article'] + "' de la ligne " + str(ligne) +\
-                       " n'est pas un code D3\n"
+            elif not artsap.contient_id(donnee['id_article']):
+                msg += "l'id article SAP de la ligne " + str(ligne) + " n'existe pas dans les codes D\n"
             elif donnee['id_article'] not in articles:
                 articles.append(donnee['id_article'])
 
@@ -84,9 +83,14 @@ class CoefPrest(Fichier):
         self.donnees = donnees_dict
         self.verifie_coherence = 1
 
-        for id_article in artsap.donnees.keys():
-            if artsap.donnees[id_article]['flux'] == 'lvr' and id_article not in articles:
+        for id_article in artsap.ids_d3:
+            if id_article not in articles:
                 msg += "L'id article SAP D3 '" + id_article + "' n'est pas présent dans "\
+                                                         "les coefficients de prestations\n"
+
+        for id_classe in classes.donnees.keys():
+            if id_classe not in clas:
+                msg += "L'id de classe '" + id_classe + "' dans les classes clients n'est pas présent dans " \
                                                          "les coefficients de prestations\n"
 
         for id_article in articles:
