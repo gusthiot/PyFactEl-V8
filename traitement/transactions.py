@@ -312,7 +312,6 @@ class Transactions(Recap):
         i = 0
         for tr in sorted(transacts.keys()):
             tarray = transacts[tr]
-            print(len(tarray))
             for transact in tarray:
                 id_compte = transact['up'][4]
                 compte = comptes.donnees[id_compte]
