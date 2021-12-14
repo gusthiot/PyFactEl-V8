@@ -7,7 +7,9 @@
 
 - lancer main.py et choisir un dossier de travail qui contient des csv de données brutes
 
-- si la fabrication de pdf avec tex live ne fonctionne pas, ouvrir une console de commande et taper 'fmtutil --sys --all'
+- si la fabrication de pdf avec tex live ne fonctionne pas, ouvrir une console de commande et taper (pour Windows) <pre>set PATH=%PATH%;C:\texlive\\<annee_version\>\bin\win32</pre>
+  si cela ne fonctionne toujours pas, taper <pre>fmtutil --sys --all</pre>
+  
 
 Le dossier 'importes' contient les classes servant à l'importation des données contenues dans les csv et au traitement 
 de base de ces données
