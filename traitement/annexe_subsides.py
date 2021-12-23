@@ -1,6 +1,7 @@
 from outils import Outils
 from importes import DossierDestination
 from datetime import datetime
+import calendar
 
 
 class AnnexeSubsides(object):
@@ -72,7 +73,8 @@ class AnnexeSubsides(object):
                     else:
                         fin = 'NULL'
 
-                    if debut == "NULL" or debut < datetime(self.annee, self.mois+1, 1):
+                    premier, dernier = calendar.monthrange(2002, 1)
+                    if debut == "NULL" or debut <= datetime(self.annee, self.mois, dernier):
                         if fin == "NULL" or fin >= datetime(self.annee, self.mois, 1):
                             code_client = compte['code_client']
                             if code_client not in clients_comptes:
