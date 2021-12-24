@@ -73,7 +73,7 @@ class AnnexeSubsides(object):
                     else:
                         fin = 'NULL'
 
-                    premier, dernier = calendar.monthrange(2002, 1)
+                    premier, dernier = calendar.monthrange(self.annee, self.mois)
                     if debut == "NULL" or debut <= datetime(self.annee, self.mois, dernier):
                         if fin == "NULL" or fin >= datetime(self.annee, self.mois, 1):
                             code_client = compte['code_client']
