@@ -7,8 +7,9 @@ class BilanConsos(object):
     """
 
     cles = ['invoice-year', 'invoice-month', 'platf-code', 'platf-name', 'proj-id', 'proj-nbr', 'proj-name',
-            'proj-expl', 'item-id', 'item-nbr', 'item-name', 'item-unit', 'item-codeD', 'item-extra',
-            'conso-propre-march-expl', 'conso-propre-extra-expl', 'conso-propre-march-proj', 'conso-propre-extra-proj']
+            'proj-expl', 'item-id', 'item-nbr', 'item-name', 'item-unit', 'item-idsap', 'item-codeD', 'item-extra',
+            'mach-extra', 'conso-propre-march-expl', 'conso-propre-extra-expl', 'conso-propre-march-proj',
+            'conso-propre-extra-proj']
 
     def __init__(self, edition, paramtexte):
         """
