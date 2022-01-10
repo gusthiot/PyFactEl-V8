@@ -83,12 +83,12 @@ class Acces(Fichier):
                                                                     ligne, 4, 0)
             msg += info
             donnee['duree_run'], info = Outils.est_un_nombre(donnee['duree_run'], "la durée du run",
-                                                                    ligne, 4, 0)
+                                                             ligne, 4, 0)
             msg += info
             donnee['duree_operateur'], info = Outils.est_un_nombre(donnee['duree_operateur'], "la durée opérateur",
                                                                    ligne, 4, 0)
             msg += info
-            if donnee['duree_run'] < (donnee['duree_machine_hc'] + donnee['duree_machine_hp']) :
+            if donnee['duree_run'] < (donnee['duree_machine_hc'] + donnee['duree_machine_hp']):
                 msg += "la durée de run de la ligne " + str(ligne) + "ne peut pas être plus petite que HP + HC"
 
             donnee['date_login'], info = Outils.est_une_date(donnee['date_login'], "la date de login", ligne)
@@ -143,7 +143,10 @@ class Acces(Fichier):
             machine = machines.donnees[id_machine]
             groupe = groupes.donnees[machine['id_groupe']]
             client = clients.donnees[code_client]
-            prix_mach = categprix.donnees[client['id_classe'] + groupe['id_cat_mach']]['prix_unit']
+            if groupe['id_cat_mach'] != '0':
+                prix_mach = categprix.donnees[client['id_classe'] + groupe['id_cat_mach']]['prix_unit']
+            else:
+                prix_mach = 0
 
             if code_client not in self.sommes:
                 self.sommes[code_client] = {'comptes': {}, 'machines': {}}
@@ -221,32 +224,35 @@ class Acces(Fichier):
                     cat_cher = groupe['id_cat_cher']
                     nat = client['id_classe']
 
-                    if cat_mach not in scat['machine']:
-                        prix_mach = categprix.donnees[nat + cat_mach]['prix_unit']
-                        scat['machine'][cat_mach] = {'pk': round(prix_mach, 2), 'quantite': 0, 'mk': 0,
-                                                     'duree_hp': 0, 'duree_hc': 0, 'mo': 0}
+                    if cat_mach != '0':
+                        if cat_mach not in scat['machine']:
+                            prix_mach = categprix.donnees[nat + cat_mach]['prix_unit']
+                            scat['machine'][cat_mach] = {'pk': round(prix_mach, 2), 'quantite': 0, 'mk': 0,
+                                                         'duree_hp': 0, 'duree_hc': 0, 'mo': 0}
+                        scat['machine'][cat_mach]['duree_hp'] += sco[id_machine]['duree_hp']
+                        scat['machine'][cat_mach]['duree_hc'] += sco[id_machine]['duree_hc']
+                        scat['machine'][cat_mach]['mo'] += sco[id_machine]['mo']
+                        scat['machine'][cat_mach]['quantite'] += sco[id_machine]['duree_hp']
+                        scat['machine'][cat_mach]['quantite'] += sco[id_machine]['duree_hc']
 
-                    if cat_mo not in scat['operateur']:
-                        prix_mo = categprix.donnees[nat + cat_mo]['prix_unit']
-                        scat['operateur'][cat_mo] = {'pk': round(prix_mo, 2), 'quantite': 0, 'mk': 0}
+                    if cat_mo != '0':
+                        if cat_mo not in scat['operateur']:
+                            prix_mo = categprix.donnees[nat + cat_mo]['prix_unit']
+                            scat['operateur'][cat_mo] = {'pk': round(prix_mo, 2), 'quantite': 0, 'mk': 0}
+                        scat['operateur'][cat_mo]['quantite'] += sco[id_machine]['mo']
 
-                    if cat_plat not in scat['plateforme']:
-                        prix_plat = categprix.donnees[nat + cat_plat]['prix_unit']
-                        scat['plateforme'][cat_plat] = {'pk': round(prix_plat, 2), 'quantite': 0, 'mk': 0}
+                    if cat_plat != '0':
+                        if cat_plat not in scat['plateforme']:
+                            prix_plat = categprix.donnees[nat + cat_plat]['prix_unit']
+                            scat['plateforme'][cat_plat] = {'pk': round(prix_plat, 2), 'quantite': 0, 'mk': 0}
+                        scat['plateforme'][cat_plat]['quantite'] += sco[id_machine]['runs']
 
-                    if cat_cher not in scat['xcher']:
-                        prix_cher = categprix.donnees[nat + cat_cher]['prix_unit']
-                        scat['xcher'][cat_cher] = {'pk': round(prix_cher, 2), 'quantite': 0, 'mk': 0}
-
-                    scat['machine'][cat_mach]['duree_hp'] += sco[id_machine]['duree_hp']
-                    scat['machine'][cat_mach]['duree_hc'] += sco[id_machine]['duree_hc']
-                    scat['machine'][cat_mach]['mo'] += sco[id_machine]['mo']
-                    scat['machine'][cat_mach]['quantite'] += sco[id_machine]['duree_hp']
-                    scat['machine'][cat_mach]['quantite'] += sco[id_machine]['duree_hc']
-                    scat['operateur'][cat_mo]['quantite'] += sco[id_machine]['mo']
-                    scat['plateforme'][cat_plat]['quantite'] += sco[id_machine]['runs']
-                    scat['xcher'][cat_cher]['quantite'] += sco[id_machine]['duree_hp']
-                    scat['xcher'][cat_cher]['quantite'] += sco[id_machine]['duree_hc']
+                    if cat_cher != '0':
+                        if cat_cher not in scat['xcher']:
+                            prix_cher = categprix.donnees[nat + cat_cher]['prix_unit']
+                            scat['xcher'][cat_cher] = {'pk': round(prix_cher, 2), 'quantite': 0, 'mk': 0}
+                        scat['xcher'][cat_cher]['quantite'] += sco[id_machine]['duree_hp']
+                        scat['xcher'][cat_cher]['quantite'] += sco[id_machine]['duree_hc']
 
                 for id_categorie in scat['machine']:
                     scat['machine'][id_categorie]['mk'] = round(

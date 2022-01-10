@@ -10,8 +10,8 @@ class Transactions(Recap):
     cles = ['invoice-year', 'invoice-month', 'invoice-ref', 'client-code', 'client-sap', 'client-name',
             'client-idclass', 'client-class', 'client-labelclass', 'oper-id', 'oper-name', 'oper-note', 'staff-note',
             'mach-id', 'mach-name', 'mach-extra', 'user-id', 'user-sciper', 'user-name', 'user-first', 'proj-id',
-            'proj-nbr', 'proj-name', 'proj-expl', 'flow-type', 'item-id', 'item-codeK', 'item-textK', 'item-nbr',
-            'item-name', 'item-unit', 'item-idsap', 'item-codeD', 'item-flag-usage', 'item-flag-conso',
+            'proj-nbr', 'proj-name', 'proj-expl', 'flow-type', 'item-id', 'item-codeK', 'item-textK', 'item-text2K',
+            'item-nbr', 'item-name', 'item-unit', 'item-idsap', 'item-codeD', 'item-flag-usage', 'item-flag-conso',
             'item-labelcode', 'item-sap', 'item-extra', 'platf-code', 'platf-op', 'platf-sap', 'platf-name', 'platf-cf',
             'platf-fund', 'transac-date', 'transac-quantity', 'transac-usage', 'transac-runtime', 'transac-runcae',
             'valuation-price', 'valuation-brut', 'discount-type', 'discount-CHF', 'valuation-net', 'subsid-code',
@@ -82,137 +82,147 @@ class Transactions(Recap):
 
             if duree_hp > 0 or duree_hc > 0:
                 # K3 CAE-run #
-                article = articles.valeurs[groupe['id_cat_plat']]
-                tarif = tarifs.valeurs[id_classe + groupe['id_cat_plat']]
-                if duree_op == 0 and tarif['valuation-price'] > 0:
-                    art = self.art_plate(article, plateformes, clients, "K3", pt['item-K3'])
+                id_groupe = groupe['id_cat_plat']
+                if id_groupe != '0':
+                    article = articles.valeurs[id_groupe]
+                    tarif = tarifs.valeurs[id_classe + id_groupe]
+                    if duree_op == 0 and tarif['valuation-price'] > 0:
+                        art = self.art_plate(article, plateformes, clients, "K3", pt['item-K3'], pt['item-K3a'])
+                        if article['platf-code'] == compte['code_client']:
+                            usage = 0
+                            if compte['exploitation'] == "TRUE":
+                                runcae = ""
+                            else:
+                                runcae = 1
+                                counted = True
+                        else:
+                            usage = 1
+                            runcae = 1
+                            counted = True
+                        trans = [entree['date_login'], 1, usage, "", runcae]
+                        val = [tarif['valuation-price'], tarif['valuation-price'], "", 0, tarif['valuation-price']]
+                        self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
+
+                # K7 CAE-runf #
+                id_groupe = groupe['id_cat_fixe']
+                if id_groupe != '0':
+                    article = articles.valeurs[id_groupe]
+                    tarif = tarifs.valeurs[id_classe + id_groupe]
+                    if tarif['valuation-price'] > 0:
+                        art = self.art_plate(article, plateformes, clients, "K7", pt['item-K7'], pt['item-K7a'])
+                        if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
+                            usage = 0
+                            runcae = ""
+                        else:
+                            usage = 1
+                            if counted:
+                                runcae = ""
+                            else:
+                                runcae = 1
+                                counted = True
+                        trans = [entree['date_login'], 1, usage, "", runcae]
+                        val = [tarif['valuation-price'], tarif['valuation-price'], "", 0, tarif['valuation-price']]
+                        self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
+
+                # K4 CAE-Extra #
+                id_groupe = groupe['id_cat_cher']
+                if id_groupe != '0':
+                    prix_extra = categprix.donnees[id_classe + id_groupe]['prix_unit']
+                    article = articles.valeurs[id_groupe]
+                    tarif = tarifs.valeurs[id_classe + id_groupe]
+                    if prix_extra > 0 and tarif['valuation-price'] > 0:
+                        duree = duree_hp + duree_hc
+                        if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
+                            usage = 0
+                            runcae = ""
+                        else:
+                            usage = duree
+                            if counted:
+                                runcae = ""
+                            else:
+                                runcae = 1
+                                counted = True
+                        trans = [entree['date_login'], duree, usage, "", runcae]
+                        art = self.art_plate(article, plateformes, clients, "K4", pt['item-K4'], pt['item-K4a'])
+                        prix = round(duree * tarif['valuation-price'], 2)
+                        val = [tarif['valuation-price'], prix, "", 0, prix]
+                        self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
+
+            # K1 CAE-HP #
+            id_groupe = groupe['id_cat_mach']
+            if id_groupe != '0':
+                article = articles.valeurs[id_groupe]
+                tarif = tarifs.valeurs[id_classe + id_groupe]
+                if duree_hp > 0 and tarif['valuation-price'] > 0:
+                    if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
+                        usage = 0
+                        runtime = ""
+                        runcae = ""
+                    else:
+                        usage = duree_hp
+                        runtime = round(entree['duree_run']/60, 4)
+                        if counted:
+                            runcae = ""
+                        else:
+                            runcae = 1
+                            counted = True
+                    art = self.art_plate(article, plateformes, clients, "K1", pt['item-K1'], pt['item-K1a'])
+                    trans = [entree['date_login'], duree_hp, usage, runtime, runcae]
+                    prix = round(duree_hp * tarif['valuation-price'], 2)
+                    val = [tarif['valuation-price'], prix, "", 0, prix]
+                    self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
+
+                # K1 CAE-HC #
+                if duree_hc > 0 and tarif['valuation-price'] > 0:
+                    if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
+                        usage = 0
+                        runtime = ""
+                        runcae = ""
+                    else:
+                        usage = duree_hc
+                        if duree_hp > 0:
+                            runtime = ""
+                        else:
+                            runtime = round(entree['duree_run']/60, 4)
+                        if counted:
+                            runcae = ""
+                        else:
+                            runcae = 1
+                            counted = True
+                    art = self.art_plate(article, plateformes, clients, "K1", pt['item-K1'], pt['item-K1b'])
+                    trans = [entree['date_login'], duree_hc, usage, runtime, runcae]
+                    prix = round(duree_hc * tarif['valuation-price'], 2)
+                    reduc = round(tarif['valuation-price'] * machine['tx_rabais_hc']/100 * duree_hc, 2)
+                    val = [tarif['valuation-price'], prix,
+                           pt['discount-HC'] + " -" + str(machine['tx_rabais_hc']) + "%", reduc, prix-reduc]
+                    self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
+
+            # K2 CAE-MO #
+            id_groupe = groupe['id_cat_mo']
+            if id_groupe != '0':
+                article = articles.valeurs[id_groupe]
+                tarif = tarifs.valeurs[id_classe + id_groupe]
+                if duree_op > 0 and tarif['valuation-price'] > 0:
+                    art = self.art_plate(article, plateformes, clients, "K2", pt['item-K2'], pt['item-K2a'])
                     if article['platf-code'] == compte['code_client']:
                         usage = 0
                         if compte['exploitation'] == "TRUE":
                             runcae = ""
                         else:
-                            runcae = 1
-                            counted = True
+                            if counted:
+                                runcae = ""
+                            else:
+                                runcae = 1
                     else:
-                        usage = 1
-                        runcae = 1
-                        counted = True
-                    trans = [entree['date_login'], 1, usage, "", runcae]
-                    val = [tarif['valuation-price'], tarif['valuation-price'], "", 0, tarif['valuation-price']]
-                    self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
-
-                # K7 CAE-runf #
-                article = articles.valeurs[groupe['id_cat_fixe']]
-                tarif = tarifs.valeurs[id_classe + groupe['id_cat_fixe']]
-                if tarif['valuation-price'] > 0:
-                    art = self.art_plate(article, plateformes, clients, "K7", pt['item-K7'])
-                    if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
-                        usage = 0
-                        runcae = ""
-                    else:
-                        usage = 1
+                        usage = duree_op
                         if counted:
                             runcae = ""
                         else:
                             runcae = 1
-                            counted = True
-                    trans = [entree['date_login'], 1, usage, "", runcae]
-                    val = [tarif['valuation-price'], tarif['valuation-price'], "", 0, tarif['valuation-price']]
-                    self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
-
-                # K4 CAE-Extra #
-                prix_extra = categprix.donnees[id_classe + groupe['id_cat_cher']]['prix_unit']
-                article = articles.valeurs[groupe['id_cat_cher']]
-                tarif = tarifs.valeurs[id_classe + groupe['id_cat_cher']]
-                if prix_extra > 0 and tarif['valuation-price'] > 0:
-                    duree = duree_hp + duree_hc
-                    if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
-                        usage = 0
-                        runcae = ""
-                    else:
-                        usage = duree
-                        if counted:
-                            runcae = ""
-                        else:
-                            runcae = 1
-                            counted = True
-                    trans = [entree['date_login'], duree, usage, "", runcae]
-                    art = self.art_plate(article, plateformes, clients, "K4", pt['item-K4'])
-                    prix = round(duree * tarif['valuation-price'], 2)
+                    trans = [entree['date_login'], duree_op, usage, "", runcae]
+                    prix = round(duree_op * tarif['valuation-price'], 2)
                     val = [tarif['valuation-price'], prix, "", 0, prix]
                     self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
-
-            # K1 CAE-HP #
-            article = articles.valeurs[groupe['id_cat_mach']]
-            tarif = tarifs.valeurs[id_classe + groupe['id_cat_mach']]
-            if duree_hp > 0 and tarif['valuation-price'] > 0:
-                art = self.art_plate(article, plateformes, clients, "K1", pt['item-K1a'])
-                if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
-                    usage = 0
-                    runtime = ""
-                    runcae = ""
-                else:
-                    usage = duree_hp
-                    runtime = round(entree['duree_run']/60, 4)
-                    if counted:
-                        runcae = ""
-                    else:
-                        runcae = 1
-                        counted = True
-                trans = [entree['date_login'], duree_hp, usage, runtime, runcae]
-                prix = round(duree_hp * tarif['valuation-price'], 2)
-                val = [tarif['valuation-price'], prix, "", 0, prix]
-                self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
-
-            # K1 CAE-HC #
-            if duree_hc > 0 and tarif['valuation-price'] > 0:
-                art = self.art_plate(article, plateformes, clients, "K1", pt['item-K1b'])
-                if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
-                    usage = 0
-                    runtime = ""
-                    runcae = ""
-                else:
-                    usage = duree_hc
-                    if duree_hp > 0:
-                        runtime = ""
-                    else:
-                        runtime = round(entree['duree_run']/60, 4)
-                    if counted:
-                        runcae = ""
-                    else:
-                        runcae = 1
-                        counted = True
-                trans = [entree['date_login'], duree_hc, usage, runtime, runcae]
-                prix = round(duree_hc * tarif['valuation-price'], 2)
-                reduc = round(tarif['valuation-price'] * machine['tx_rabais_hc']/100 * duree_hc, 2)
-                val = [tarif['valuation-price'], prix, pt['discount-HC'] + " -" + str(machine['tx_rabais_hc']) + "%",
-                       reduc, prix-reduc]
-                self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
-
-            # K2 CAE-MO #
-            article = articles.valeurs[groupe['id_cat_mo']]
-            tarif = tarifs.valeurs[id_classe + groupe['id_cat_mo']]
-            if duree_op > 0 and tarif['valuation-price'] > 0:
-                art = self.art_plate(article, plateformes, clients, "K2", pt['item-K2'])
-                if article['platf-code'] == compte['code_client']:
-                    usage = 0
-                    if compte['exploitation'] == "TRUE":
-                        runcae = ""
-                    else:
-                        if counted:
-                            runcae = ""
-                        else:
-                            runcae = 1
-                else:
-                    usage = duree_op
-                    if counted:
-                        runcae = ""
-                    else:
-                        runcae = 1
-                trans = [entree['date_login'], duree_op, usage, "", runcae]
-                prix = round(duree_op * tarif['valuation-price'], 2)
-                val = [tarif['valuation-price'], prix, "", 0, prix]
-                self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
 
         for entree in noshows.donnees:
             compte = comptes.donnees[entree['id_compte']]
@@ -225,25 +235,28 @@ class Transactions(Recap):
             groupe = groupes.donnees[machine['id_groupe']]
             if entree['type'] == 'HP':
                 # K5 NoShow-HP #
-                article = articles.valeurs[groupe['id_cat_hp']]
-                tarif = tarifs.valeurs[id_classe + groupe['id_cat_hp']]
+                id_groupe = groupe['id_cat_hp']
                 code = "K5"
                 texte = pt['item-K5']
+                texte2 = pt['item-K5a']
             else:
                 # K6 NoShow-HC #
-                article = articles.valeurs[groupe['id_cat_hc']]
-                tarif = tarifs.valeurs[id_classe + groupe['id_cat_hc']]
+                id_groupe = groupe['id_cat_hc']
                 code = "K6"
                 texte = pt['item-K6']
+                texte2 = pt['item-K6a']
 
-            if tarif['valuation-price'] > 0:
-                ope = ["", "", "", "", id_machine, machine['nom'], ""]
-                art = self.art_plate(article, plateformes, clients, code, texte)
-                util_proj = self.util_proj(entree['id_user'], users, compte, pt['flow-noshow'])
-                trans = [entree['date_debut'], entree['penalite'], 0, "", ""]
-                prix = round(entree['penalite'] * tarif['valuation-price'], 2)
-                val = [tarif['valuation-price'], prix, "", 0, prix]
-                self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
+            if id_groupe != '0':
+                article = articles.valeurs[id_groupe]
+                tarif = tarifs.valeurs[id_classe + id_groupe]
+                if tarif['valuation-price'] > 0:
+                    ope = ["", "", "", "", id_machine, machine['nom'], ""]
+                    util_proj = self.util_proj(entree['id_user'], users, compte, pt['flow-noshow'])
+                    art = self.art_plate(article, plateformes, clients, code, texte, texte2)
+                    trans = [entree['date_debut'], entree['penalite'], 0, "", ""]
+                    prix = round(entree['penalite'] * tarif['valuation-price'], 2)
+                    val = [tarif['valuation-price'], prix, "", 0, prix]
+                    self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
 
         for entree in livraisons.donnees:
             compte = comptes.donnees[entree['id_compte']]
@@ -269,19 +282,18 @@ class Transactions(Recap):
                 groupe = groupes.donnees[machine['id_groupe']]
                 nm = machine['nom']
                 extra = groupe['id_cat_mach']
-            if tarif['valuation-price'] > 0:
-                art = self.art_plate(article, plateformes, clients, "", "")
-                ope = [entree['id_operateur'], operateur['prenom'] + " " + operateur['nom'],
-                       pt['oper-PO'] + " " + str(entree['date_commande']), entree['remarque'], idm, nm, extra]
-                util_proj = self.util_proj(entree['id_user'], users, compte, pt['flow-lvr'])
-                trans = [entree['date_livraison'], entree['quantite'], 0, "", ""]
-                if entree['rabais'] > 0:
-                    discount = pt['discount-LVR']
-                else:
-                    discount = ""
-                prix = round(entree['quantite'] * tarif['valuation-price'], 2)
-                val = [tarif['valuation-price'], prix, discount, entree['rabais'], prix-entree['rabais']]
-                self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
+            art = self.art_plate(article, plateformes, clients, "", "", "")
+            ope = [entree['id_operateur'], operateur['prenom'] + " " + operateur['nom'],
+                   pt['oper-PO'] + " " + str(entree['date_commande']), entree['remarque'], idm, nm, extra]
+            util_proj = self.util_proj(entree['id_user'], users, compte, pt['flow-lvr'])
+            trans = [entree['date_livraison'], entree['quantite'], 0, "", ""]
+            if entree['rabais'] > 0:
+                discount = pt['discount-LVR']
+            else:
+                discount = ""
+            prix = round(entree['quantite'] * tarif['valuation-price'], 2)
+            val = [tarif['valuation-price'], prix, discount, entree['rabais'], prix-entree['rabais']]
+            self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
 
         # SRV
         for entree in services.donnees:
@@ -294,19 +306,18 @@ class Transactions(Recap):
             operateur = users.donnees[entree['id_op']]
             article = articles.valeurs[id_categorie]
             tarif = tarifs.valeurs[id_classe + id_categorie]
-            if tarif['valuation-price'] > 0:
-                ope = [entree['id_op'], operateur['prenom'] + " " + operateur['nom'], "", entree['remarque_staff'],
-                       "", "", ""]
-                util_proj = self.util_proj(entree['id_user'], users, compte, pt['flow-srv'])
-                art = self.art_plate(article, plateformes, clients, "", "")
-                if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
-                    usage = 0
-                else:
-                    usage = entree['quantite']
-                trans = [entree['date'], entree['quantite'], usage, "", ""]
-                prix = round(entree['quantite'] * tarif['valuation-price'], 2)
-                val = [tarif['valuation-price'], prix, "", 0, prix]
-                self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
+            ope = [entree['id_op'], operateur['prenom'] + " " + operateur['nom'], "", entree['remarque_staff'],
+                   "", "", ""]
+            util_proj = self.util_proj(entree['id_user'], users, compte, pt['flow-srv'])
+            art = self.art_plate(article, plateformes, clients, "", "", "")
+            if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
+                usage = 0
+            else:
+                usage = entree['quantite']
+            trans = [entree['date'], entree['quantite'], usage, "", ""]
+            prix = round(entree['quantite'] * tarif['valuation-price'], 2)
+            val = [tarif['valuation-price'], prix, "", 0, prix]
+            self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
 
         # subsides et montants
         i = 0
@@ -371,7 +382,7 @@ class Transactions(Recap):
                 compte['intitule'], compte['exploitation'], flux]
 
     @staticmethod
-    def art_plate(article, plateformes, clients, code_k, texte_k):
+    def art_plate(article, plateformes, clients, code_k, texte_k, texte2_k):
         """
         ajout des valeurs issues de l'article et de la plateforme
         :param article: article de la transaction
@@ -379,15 +390,16 @@ class Transactions(Recap):
         :param clients: clients importés
         :param code_k: code catégorie
         :param texte_k: texte catégorie
+        :param texte2_k: texte 2 catégorie
         :return tableau contenant les valeurs de l'article et de la plateforme
         """
         plateforme = plateformes.donnees[article['platf-code']]
         client = clients.donnees[plateforme['id_plateforme']]
-        return [article['item-id'], code_k, texte_k, article['item-nbr'], article['item-name'], article['item-unit'],
-                article['item-idsap'], article['item-codeD'], article['item-flag-usage'], article['item-flag-conso'],
-                article['item-labelcode'], article['item-sap'], article['item-extra'], article['platf-code'],
-                plateforme['code_p'], client['code_sap'], plateforme['intitule'], plateforme['centre'],
-                plateforme['fonds']]
+        return [article['item-id'], code_k, texte_k, texte2_k, article['item-nbr'], article['item-name'],
+                article['item-unit'], article['item-idsap'], article['item-codeD'], article['item-flag-usage'],
+                article['item-flag-conso'], article['item-labelcode'], article['item-sap'], article['item-extra'],
+                article['platf-code'], plateforme['code_p'], client['code_sap'], plateforme['intitule'],
+                plateforme['centre'], plateforme['fonds']]
 
     def subsides(self, subsides, cles, plafonds, grants, compte, id_classe, article, date, montant, id_machine):
         """
@@ -414,7 +426,7 @@ class Transactions(Recap):
                 result[2] = subside['debut']
                 result[3] = subside['fin']
                 result[4] = "NO"
-                plaf = type_s + article['item-idsap']
+                plaf = type_s + article['platf-code'] + article['item-idsap']
                 if plaf in plafonds.donnees.keys():
                     plafond = plafonds.donnees[plaf]
                     result[5] = plafond['pourcentage']
@@ -424,10 +436,9 @@ class Transactions(Recap):
                         if subside['fin'] == "NULL" or subside['fin'] >= date:
                             if type_s in cles.donnees.keys():
                                 dict_s = cles.donnees[type_s]
-                                if self.check_plateforme(dict_s, article['platf-code'], id_classe,
-                                                         compte['code_client'], id_machine):
+                                if self.check_id_classe(dict_s, id_classe, compte['code_client'], id_machine):
                                     result[4] = "YES"
-                                    cg_id = compte['id_compte'] + article['item-idsap']
+                                    cg_id = compte['id_compte'] + article['platf-code'] + article['item-idsap']
                                     if cg_id in grants.donnees.keys():
                                         grant = grants.donnees[cg_id]['montant']
                                     else:
@@ -452,41 +463,20 @@ class Transactions(Recap):
         return result
 
     @staticmethod
-    def check_plateforme(dict_s, plateforme, id_classe, code_client, id_machine):
+    def check_id_classe(dict_s, id_classe, code_client, id_machine):
         """
-        vérifie si les clés subsides contiennent la plateforme, ou 0
+        vérifie si les clés subsides contiennent le code N, ou 0
         :param dict_s: dict pour le type
-        :param plateforme: plateforme à vérifier
         :param id_classe: id_classe à vérifier
         :param code_client: code client à vérifier
         :param id_machine: machine à vérifier
 
         """
         if "0" in dict_s:
-            if Transactions.check_id_classe(dict_s, "0", id_classe, code_client, id_machine):
+            if Transactions.check_client(dict_s, "0", code_client, id_machine):
                 return True
-        if plateforme in dict_s:
-            if Transactions.check_id_classe(dict_s, plateforme, id_classe, code_client, id_machine):
-                return True
-        return False
-
-    @staticmethod
-    def check_id_classe(dict_s, plateforme, id_classe, code_client, id_machine):
-        """
-        vérifie si les clés subsides contiennent le code N, ou 0
-        :param dict_s: dict pour le type
-        :param plateforme: plateforme sélectionnée ou 0
-        :param id_classe: id_classe à vérifier
-        :param code_client: code client à vérifier
-        :param id_machine: machine à vérifier
-
-        """
-        dict_p = dict_s[plateforme]
-        if "0" in dict_p:
-            if Transactions.check_client(dict_p, "0", code_client, id_machine):
-                return True
-        if id_classe in dict_p:
-            if Transactions.check_client(dict_p, id_classe, code_client, id_machine):
+        if id_classe in dict_s:
+            if Transactions.check_client(dict_s, id_classe, code_client, id_machine):
                 return True
         return False
 

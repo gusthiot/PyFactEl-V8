@@ -208,7 +208,7 @@ try:
         new_grants.csv(DossierDestination(dossier_enregistrement))
 
     bilan_trs = BilansTransacts(edition, paramtexte, paramannexe)
-    bilan_trs.generer(trans_vals, grants, plafonds, comptes, clients, subsides, artsap, userlabs,
+    bilan_trs.generer(trans_vals, grants, plafonds, comptes, clients, subsides, artsap, plateformes, userlabs,
                       DossierDestination(dossier_enregistrement))
 
     # faire les annexes avant la facture, que le ticket puisse vérifier leur existence

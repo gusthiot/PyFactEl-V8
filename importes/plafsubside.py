@@ -8,17 +8,18 @@ class PlafSubside(Fichier):
     """
 
     nom_fichier = "plafsubside.csv"
-    cles = ['type', 'id_article', 'pourcentage', 'max_mois', 'max_compte']
+    cles = ['type', 'id_plateforme', 'id_article', 'pourcentage', 'max_mois', 'max_compte']
     libelle = "Plafonds Subsides"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def est_coherent(self, subsides, artsap):
+    def est_coherent(self, subsides, artsap, plateformes):
         """
         vérifie que les données du fichier importé sont cohérentes
         :param subsides: subsides importés
         :param artsap: articles SAP importés
+        :param plateformes: plateformes importées
         :return: 1 s'il y a une erreur, 0 sinon
         """
 
@@ -29,7 +30,7 @@ class PlafSubside(Fichier):
         msg = ""
         ligne = 1
         donnees_dict = {}
-        couples = []
+        triplets = []
 
         del self.donnees[0]
         for donnee in self.donnees:
@@ -43,12 +44,18 @@ class PlafSubside(Fichier):
             elif not artsap.contient_id(donnee['id_article']):
                 msg += "l'id article SAP de la ligne " + str(ligne) + " n'existe pas dans les codes D\n"
 
-            couple = [donnee['type'], donnee['id_article']]
-            if couple not in couples:
-                couples.append(couple)
+            if donnee['id_plateforme'] == "":
+                msg += "l'id plateforme de la ligne " + str(ligne) + " ne peut être vide\n"
+            elif plateformes.contient_id(donnee['id_plateforme']) == 0:
+                msg += "l'id plateforme '" + donnee['id_plateforme'] + "' de la ligne " + str(ligne) \
+                       + " n'est pas référencé\n"
+
+            triplet = [donnee['type'], donnee['id_plateforme'], donnee['id_article']]
+            if triplet not in triplets:
+                triplets.append(triplet)
             else:
-                msg += "Couple type '" + donnee['type'] + "' et id article SAP '" + \
-                       donnee['id_article'] + "' de la ligne " + str(ligne) + " pas unique\n"
+                msg += "Triplet type '" + donnee['type'] + "' id plateforme '" + donnee['id_plateforme'] + \
+                       "' et id article SAP '" + donnee['id_article'] + "' de la ligne " + str(ligne) + " pas unique\n"
 
             donnee['pourcentage'], info = Outils.est_un_nombre(donnee['pourcentage'], "le pourcentage", ligne, 2, 0,
                                                                100)

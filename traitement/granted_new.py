@@ -7,8 +7,8 @@ class GrantedNew(object):
     Classe pour la création du listing des montants de subsides comptabilisés
     """
 
-    cles = ['id_compte', 'id_article', 'montant']
-    noms = ['Id-Compte', 'Id-ArticleSAP', 'Montant comptabilisé']
+    cles = ['id_compte', 'id_plateforme', 'id_article', 'montant']
+    noms = ['Id-Compte', 'Id-Plateforme', 'Id-ArticleSAP', 'Montant comptabilisé']
 
     def __init__(self, edition):
         """

@@ -8,16 +8,15 @@ class CleSubside(Fichier):
     """
 
     nom_fichier = "clesubside.csv"
-    cles = ['type', 'id_plateforme', 'id_classe', 'code_client', 'id_machine']
+    cles = ['type', 'id_classe', 'code_client', 'id_machine']
     libelle = "Clés Subsides"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def est_coherent(self, plateformes, clients, machines, classes, subsides):
+    def est_coherent(self, clients, machines, classes, subsides):
         """
         vérifie que les données du fichier importé sont cohérentes
-        :param plateformes: plateformes importées
         :param clients: clients importés
         :param machines: machines importées
         :param classes: classes clients importées
@@ -32,7 +31,7 @@ class CleSubside(Fichier):
         msg = ""
         ligne = 1
         donnees_dict = {}
-        quintuplets = []
+        quadruplets = []
 
         del self.donnees[0]
         for donnee in self.donnees:
@@ -40,12 +39,6 @@ class CleSubside(Fichier):
                 msg += "le type de la ligne " + str(ligne) + " ne peut être vide\n"
             elif subsides.contient_type(donnee['type']) == 0:
                 msg += "le type '" + donnee['type'] + "' de la ligne " + str(ligne) + " n'est pas référencé\n"
-
-            if donnee['id_plateforme'] == "":
-                msg += "l'id plateforme de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif plateformes.contient_id(donnee['id_plateforme']) == 0:
-                msg += "l'id plateforme '" + donnee['id_plateforme'] + "' de la ligne " + str(ligne) \
-                       + " n'est pas référencé\n"
 
             if donnee['id_classe'] != "0" and not classes.contient_id(donnee['id_classe']):
                 msg += "l'id classe client de la ligne " + str(ligne) + " n'existe pas\n"
@@ -58,21 +51,17 @@ class CleSubside(Fichier):
                 msg += "le machine id '" + donnee['id_machine'] + "' de la ligne " + str(ligne)\
                        + " n'est pas référencé\n"
 
-            quintuplet = donnee['type'] + donnee['id_plateforme'] + donnee['id_classe'] + donnee['code_client'] + \
-                donnee['id_machine']
+            quadruplet = donnee['type'] + donnee['id_classe'] + donnee['code_client'] + donnee['id_machine']
 
-            if quintuplet not in quintuplets:
-                quintuplets.append(quintuplet)
+            if quadruplet not in quadruplets:
+                quadruplets.append(quadruplet)
             else:
-                msg += "le quintuplet de la ligne " + str(ligne) + \
+                msg += "le quadruplet de la ligne " + str(ligne) + \
                        " n'est pas unique\n"
 
             if donnee['type'] not in donnees_dict:
                 donnees_dict[donnee['type']] = {}
-            dict_t = donnees_dict[donnee['type']]
-            if donnee['id_plateforme'] not in dict_t:
-                dict_t[donnee['id_plateforme']] = {}
-            dict_p = dict_t[donnee['id_plateforme']]
+            dict_p = donnees_dict[donnee['type']]
             if donnee['id_classe'] not in dict_p:
                 dict_p[donnee['id_classe']] = {}
             dict_n = dict_p[donnee['id_classe']]

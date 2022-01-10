@@ -125,8 +125,14 @@ class NoShow(Fichier):
             nat = client['id_classe']
             cat_hp = groupe['id_cat_hp']
             cat_hc = groupe['id_cat_hc']
-            pu_hp = round(categprix.donnees[nat + cat_hp]['prix_unit'], 2)
-            pu_hc = round(categprix.donnees[nat + cat_hc]['prix_unit'], 2)
+            if cat_hp != '0':
+                pu_hp = round(categprix.donnees[nat + cat_hp]['prix_unit'], 2)
+            else:
+                pu_hp = 0
+            if cat_hc != '0':
+                pu_hc = round(categprix.donnees[nat + cat_hc]['prix_unit'], 2)
+            else:
+                pu_hc = 0
 
             if donnee['type'] == "HP":
                 np_hp = round(donnee['penalite'], 1)

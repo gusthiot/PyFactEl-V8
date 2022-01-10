@@ -60,43 +60,43 @@ class Groupe(Fichier):
 
             if donnee['id_cat_mach'] == "":
                 msg += "l'id catégorie machine de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif categories.contient_id(donnee['id_cat_mach']) == 0:
+            elif donnee['id_cat_mach'] != '0' and categories.contient_id(donnee['id_cat_mach']) == 0:
                 msg += "l'id catégorie machine '" + donnee['id_cat_mach'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
 
             if donnee['id_cat_mo'] == "":
                 msg += "l'id catégorie opérateur de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif categories.contient_id(donnee['id_cat_mo']) == 0:
+            elif donnee['id_cat_mo'] != '0' and categories.contient_id(donnee['id_cat_mo']) == 0:
                 msg += "l'id catégorie opérateur '" + donnee['id_cat_mo'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
 
             if donnee['id_cat_plat'] == "":
                 msg += "l'id catégorie plateforme de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif categories.contient_id(donnee['id_cat_plat']) == 0:
+            elif donnee['id_cat_plat'] != '0' and categories.contient_id(donnee['id_cat_plat']) == 0:
                 msg += "l'id catégorie plateforme '" + donnee['id_cat_plat'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
 
             if donnee['id_cat_cher'] == "":
                 msg += "l'id catégorie onéreux de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif categories.contient_id(donnee['id_cat_cher']) == 0:
+            elif donnee['id_cat_cher'] != '0' and categories.contient_id(donnee['id_cat_cher']) == 0:
                 msg += "l'id catégorie onéreux '" + donnee['id_cat_cher'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
 
             if donnee['id_cat_hp'] == "":
                 msg += "l'id catégorie hp de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif categories.contient_id(donnee['id_cat_hp']) == 0:
+            elif donnee['id_cat_hp'] != '0' and categories.contient_id(donnee['id_cat_hp']) == 0:
                 msg += "l'id catégorie hp '" + donnee['id_cat_hp'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
 
             if donnee['id_cat_hc'] == "":
                 msg += "l'id catégorie hc de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif categories.contient_id(donnee['id_cat_hc']) == 0:
+            elif donnee['id_cat_hc'] != '0' and categories.contient_id(donnee['id_cat_hc']) == 0:
                 msg += "l'id catégorie hc '" + donnee['id_cat_hc'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
 
             if donnee['id_cat_fixe'] == "":
                 msg += "l'id catégorie fixe de la ligne " + str(ligne) + " ne peut être vide\n"
-            elif categories.contient_id(donnee['id_cat_fixe']) == 0:
+            elif donnee['id_cat_fixe'] != '0' and categories.contient_id(donnee['id_cat_fixe']) == 0:
                 msg += "l'id catégorie fixe '" + donnee['id_cat_fixe'] + "' de la ligne " + str(ligne) \
                        + " n'est pas référencé\n"
 

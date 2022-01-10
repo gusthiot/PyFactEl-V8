@@ -9,9 +9,9 @@ class AnnexeSubsides(object):
     Classe pour la création du csv d'annexe subsides
     """
 
-    cles = ['invoice-year', 'invoice-month', 'client-code', 'client-name', 'proj-id', 'proj-name', 'item-codeD',
-            'item-labelcode', 'subsid-code', 'subsid-name', 'subsid-start', 'subsid-end', 'subsid-pourcent',
-            'subsid-maxproj', 'subsid-maxmois', 'subsid-alrdygrant', 'subsid-CHF', 'subsid-reste']
+    cles = ['invoice-year', 'invoice-month', 'platf-name', 'client-code', 'client-name', 'proj-id', 'proj-name',
+            'item-codeD', 'item-labelcode', 'subsid-code', 'subsid-name', 'subsid-start', 'subsid-end',
+            'subsid-pourcent', 'subsid-maxproj', 'subsid-maxmois', 'subsid-alrdygrant', 'subsid-CHF', 'subsid-reste']
 
     def __init__(self, edition, paramtexte, paramannexe):
         """
@@ -31,7 +31,7 @@ class AnnexeSubsides(object):
         self.prefixe = "Annexe-subsides_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois) + "_" + \
             str(edition.version)
 
-    def generer(self, trans_vals, grants, plafonds, par_client, comptes, clients, subsides, artsap):
+    def generer(self, trans_vals, grants, plafonds, par_client, comptes, clients, subsides, artsap, plateformes):
         """
         génération des fichiers d'annexes subsides à partir des transactions
         :param trans_vals: valeurs des transactions générées
@@ -42,6 +42,7 @@ class AnnexeSubsides(object):
         :param clients: clients importés
         :param subsides: subsides importés
         :param artsap: articles SAP importés
+        :param plateformes: plateformes importées
         """
         pt = self.paramtexte.donnees
 
@@ -91,36 +92,38 @@ class AnnexeSubsides(object):
                 compte = comptes.donnees[id_compte]
                 type_s = compte['type_subside']
                 subside = subsides.donnees[type_s]
-                for id_article in artsap.ids:
-                    plaf = type_s + id_article
-                    if plaf in plafonds.donnees.keys():
-                        plafond = plafonds.donnees[plaf]
-                        ligne = [self.annee, self.mois, client['code'], client['abrev_labo'], compte['id_compte'],
-                                 compte['intitule'], id_article, artsap.donnees[id_article]['intitule_long'],
-                                 subside['type'], subside['intitule'], subside['debut'], subside['fin'],
-                                 plafond['pourcentage'], plafond['max_compte'], plafond['max_mois']]
-                        subs = 0
-                        g_id = id_compte + id_article
-                        if g_id in grants.donnees.keys():
-                            grant, info = Outils.est_un_nombre(grants.donnees[g_id]['montant'], "le montant de grant",
-                                                               min=0, arrondi=2)
-                            if info != "":
-                                Outils.affiche_message(info)
-                        else:
-                            grant = 0
-                        if code in par_client and id_compte in par_client[code]['comptes']:
-                            par_code = par_client[code]['comptes'][id_compte]
-                            if id_article in par_code.keys():
-                                tbtr = par_code[id_article]
-                                for indice in tbtr:
-                                    val, info = Outils.est_un_nombre(trans_vals[indice]['subsid-CHF'], "le subside CHF",
-                                                                     arrondi=2)
-                                    subs += val
+                for id_plateforme in plateformes.ids:
+                    for id_article in artsap.ids:
+                        plaf = type_s + id_plateforme + id_article
+                        if plaf in plafonds.donnees.keys():
+                            plafond = plafonds.donnees[plaf]
+                            ligne = [self.annee, self.mois, id_plateforme, client['code'], client['abrev_labo'],
+                                     compte['id_compte'], compte['intitule'], id_article,
+                                     artsap.donnees[id_article]['intitule_long'], subside['type'], subside['intitule'],
+                                     subside['debut'], subside['fin'], plafond['pourcentage'], plafond['max_compte'],
+                                     plafond['max_mois']]
+                            subs = 0
+                            g_id = id_compte + id_plateforme + id_article
+                            if g_id in grants.donnees.keys():
+                                grant, info = Outils.est_un_nombre(grants.donnees[g_id]['montant'], "le montant de grant",
+                                                                   min=0, arrondi=2)
+                                if info != "":
+                                    Outils.affiche_message(info)
+                            else:
+                                grant = 0
+                            if code in par_client and id_compte in par_client[code]['comptes']:
+                                par_code = par_client[code]['comptes'][id_compte]
+                                if id_article in par_code.keys():
+                                    tbtr = par_code[id_article]
+                                    for indice in tbtr:
+                                        val, info = Outils.est_un_nombre(trans_vals[indice]['subsid-CHF'], "le subside CHF",
+                                                                         arrondi=2)
+                                        subs += val
 
-                        reste = plafond['max_compte'] - grant - subs
-                        ligne += [round(grant, 2), round(subs, 2), round(reste, 2)]
-                        lignes.append(ligne)
-                        ii += 1
+                            reste = plafond['max_compte'] - grant - subs
+                            ligne += [round(grant, 2), round(subs, 2), round(reste, 2)]
+                            lignes.append(ligne)
+                            ii += 1
             with dossier_destination.writer(nom) as fichier_writer:
                 ligne = []
                 for cle in self.cles:

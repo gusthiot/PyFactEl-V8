@@ -34,7 +34,8 @@ class BilansTransacts(object):
         self.stat_cli = StatClient(edition, paramtexte)
         self.stat_mach = StatMachine(edition, paramtexte)
 
-    def generer(self, trans_vals, grants, plafonds, comptes, clients, subsides, artsap, userlabs, dossier_destination):
+    def generer(self, trans_vals, grants, plafonds, comptes, clients, subsides, artsap, plateformes, userlabs,
+                dossier_destination):
         """
         tri des transactions et génération des bilans
         :param trans_vals: valeurs des transactions générées
@@ -44,6 +45,7 @@ class BilansTransacts(object):
         :param clients: clients importés
         :param subsides: subsides importés
         :param artsap: articles SAP importés
+        :param plateformes: plateformes importées
         :param userlabs: users labo importés
         :param dossier_destination: Une instance de la classe dossier.DossierDestination
         """
@@ -131,7 +133,7 @@ class BilansTransacts(object):
                 ppuc['days'][day] = key  # => user labo
 
         self.ann_dets.generer(trans_vals, par_client)
-        self.ann_subs.generer(trans_vals, grants, plafonds, par_client, comptes, clients, subsides, artsap)
+        self.ann_subs.generer(trans_vals, grants, plafonds, par_client, comptes, clients, subsides, artsap, plateformes)
         self.bil_plat.generer(trans_vals, dossier_destination, par_plate)
         self.bil_use.generer(trans_vals, dossier_destination, par_plate)
         self.bil_conso.generer(trans_vals, dossier_destination, par_plate)

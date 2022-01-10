@@ -13,6 +13,7 @@ class Plateforme(Fichier):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.ids = []
 
     def contient_id(self, id_plat):
         """
@@ -43,7 +44,6 @@ class Plateforme(Fichier):
         msg = ""
         ligne = 1
         donnees_dict = {}
-        ids = []
 
         del self.donnees[0]
         for donnee in self.donnees:
@@ -51,8 +51,8 @@ class Plateforme(Fichier):
                 msg += "l'id plateforme " + str(ligne) + " ne peut être vide\n"
             elif donnee['id_plateforme'] not in clients.obtenir_codes():
                 msg += "l'id plateforme de la ligne " + str(ligne) + " n'existe pas dans les clients \n"
-            elif donnee['id_plateforme'] not in ids:
-                ids.append(donnee['id_plateforme'])
+            elif donnee['id_plateforme'] not in self.ids:
+                self.ids.append(donnee['id_plateforme'])
             else:
                 msg += "l'id plateforme de la ligne " + str(ligne) + " n'est pas unique \n"
             donnee['code_p'], info = Outils.est_un_alphanumerique(donnee['code_p'], "le code P", ligne)
