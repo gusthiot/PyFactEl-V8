@@ -83,54 +83,52 @@ class Transactions(Recap):
             if duree_hp > 0 or duree_hc > 0:
                 # K3 CAE-run #
                 id_groupe = groupe['id_cat_plat']
-                if id_groupe != '0':
+                if id_groupe != '0' and duree_op == 0:
                     article = articles.valeurs[id_groupe]
                     tarif = tarifs.valeurs[id_classe + id_groupe]
-                    if duree_op == 0 and tarif['valuation-price'] > 0:
-                        art = self.art_plate(article, plateformes, clients, "K3", pt['item-K3'], pt['item-K3a'])
-                        if article['platf-code'] == compte['code_client']:
-                            usage = 0
-                            if compte['exploitation'] == "TRUE":
-                                runcae = ""
-                            else:
-                                runcae = 1
-                                counted = True
+                    art = self.art_plate(article, plateformes, clients, "K3", pt['item-K3'], pt['item-K3a'])
+                    if article['platf-code'] == compte['code_client']:
+                        usage = 0
+                        if compte['exploitation'] == "TRUE":
+                            runcae = ""
                         else:
-                            usage = 1
                             runcae = 1
                             counted = True
-                        trans = [entree['date_login'], 1, usage, "", runcae]
-                        val = [tarif['valuation-price'], tarif['valuation-price'], "", 0, tarif['valuation-price']]
-                        self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
+                    else:
+                        usage = 1
+                        runcae = 1
+                        counted = True
+                    trans = [entree['date_login'], 1, usage, "", runcae]
+                    val = [tarif['valuation-price'], tarif['valuation-price'], "", 0, tarif['valuation-price']]
+                    self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
 
                 # K7 CAE-runf #
                 id_groupe = groupe['id_cat_fixe']
                 if id_groupe != '0':
                     article = articles.valeurs[id_groupe]
                     tarif = tarifs.valeurs[id_classe + id_groupe]
-                    if tarif['valuation-price'] > 0:
-                        art = self.art_plate(article, plateformes, clients, "K7", pt['item-K7'], pt['item-K7a'])
-                        if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
-                            usage = 0
+                    art = self.art_plate(article, plateformes, clients, "K7", pt['item-K7'], pt['item-K7a'])
+                    if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
+                        usage = 0
+                        runcae = ""
+                    else:
+                        usage = 1
+                        if counted:
                             runcae = ""
                         else:
-                            usage = 1
-                            if counted:
-                                runcae = ""
-                            else:
-                                runcae = 1
-                                counted = True
-                        trans = [entree['date_login'], 1, usage, "", runcae]
-                        val = [tarif['valuation-price'], tarif['valuation-price'], "", 0, tarif['valuation-price']]
-                        self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
+                            runcae = 1
+                            counted = True
+                    trans = [entree['date_login'], 1, usage, "", runcae]
+                    val = [tarif['valuation-price'], tarif['valuation-price'], "", 0, tarif['valuation-price']]
+                    self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
 
                 # K4 CAE-Extra #
                 id_groupe = groupe['id_cat_cher']
                 if id_groupe != '0':
                     prix_extra = categprix.donnees[id_classe + id_groupe]['prix_unit']
-                    article = articles.valeurs[id_groupe]
-                    tarif = tarifs.valeurs[id_classe + id_groupe]
-                    if prix_extra > 0 and tarif['valuation-price'] > 0:
+                    if prix_extra > 0:
+                        article = articles.valeurs[id_groupe]
+                        tarif = tarifs.valeurs[id_classe + id_groupe]
                         duree = duree_hp + duree_hc
                         if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
                             usage = 0
@@ -153,7 +151,7 @@ class Transactions(Recap):
             if id_groupe != '0':
                 article = articles.valeurs[id_groupe]
                 tarif = tarifs.valeurs[id_classe + id_groupe]
-                if duree_hp > 0 and tarif['valuation-price'] > 0:
+                if duree_hp > 0:
                     if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
                         usage = 0
                         runtime = ""
@@ -173,7 +171,7 @@ class Transactions(Recap):
                     self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
 
                 # K1 CAE-HC #
-                if duree_hc > 0 and tarif['valuation-price'] > 0:
+                if duree_hc > 0:
                     if article['platf-code'] == compte['code_client'] and compte['exploitation'] == "TRUE":
                         usage = 0
                         runtime = ""
@@ -199,30 +197,29 @@ class Transactions(Recap):
 
             # K2 CAE-MO #
             id_groupe = groupe['id_cat_mo']
-            if id_groupe != '0':
+            if id_groupe != '0' and duree_op > 0:
                 article = articles.valeurs[id_groupe]
                 tarif = tarifs.valeurs[id_classe + id_groupe]
-                if duree_op > 0 and tarif['valuation-price'] > 0:
-                    art = self.art_plate(article, plateformes, clients, "K2", pt['item-K2'], pt['item-K2a'])
-                    if article['platf-code'] == compte['code_client']:
-                        usage = 0
-                        if compte['exploitation'] == "TRUE":
-                            runcae = ""
-                        else:
-                            if counted:
-                                runcae = ""
-                            else:
-                                runcae = 1
+                art = self.art_plate(article, plateformes, clients, "K2", pt['item-K2'], pt['item-K2a'])
+                if article['platf-code'] == compte['code_client']:
+                    usage = 0
+                    if compte['exploitation'] == "TRUE":
+                        runcae = ""
                     else:
-                        usage = duree_op
                         if counted:
                             runcae = ""
                         else:
                             runcae = 1
-                    trans = [entree['date_login'], duree_op, usage, "", runcae]
-                    prix = round(duree_op * tarif['valuation-price'], 2)
-                    val = [tarif['valuation-price'], prix, "", 0, prix]
-                    self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
+                else:
+                    usage = duree_op
+                    if counted:
+                        runcae = ""
+                    else:
+                        runcae = 1
+                trans = [entree['date_login'], duree_op, usage, "", runcae]
+                prix = round(duree_op * tarif['valuation-price'], 2)
+                val = [tarif['valuation-price'], prix, "", 0, prix]
+                self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
 
         for entree in noshows.donnees:
             compte = comptes.donnees[entree['id_compte']]
@@ -249,14 +246,13 @@ class Transactions(Recap):
             if id_groupe != '0':
                 article = articles.valeurs[id_groupe]
                 tarif = tarifs.valeurs[id_classe + id_groupe]
-                if tarif['valuation-price'] > 0:
-                    ope = ["", "", "", "", id_machine, machine['nom'], ""]
-                    util_proj = self.util_proj(entree['id_user'], users, compte, pt['flow-noshow'])
-                    art = self.art_plate(article, plateformes, clients, code, texte, texte2)
-                    trans = [entree['date_debut'], entree['penalite'], 0, "", ""]
-                    prix = round(entree['penalite'] * tarif['valuation-price'], 2)
-                    val = [tarif['valuation-price'], prix, "", 0, prix]
-                    self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
+                ope = ["", "", "", "", id_machine, machine['nom'], ""]
+                util_proj = self.util_proj(entree['id_user'], users, compte, pt['flow-noshow'])
+                art = self.art_plate(article, plateformes, clients, code, texte, texte2)
+                trans = [entree['date_debut'], entree['penalite'], 0, "", ""]
+                prix = round(entree['penalite'] * tarif['valuation-price'], 2)
+                val = [tarif['valuation-price'], prix, "", 0, prix]
+                self.put_in_transacts(transacts, ref_client, ope, util_proj, art, trans, val)
 
         for entree in livraisons.donnees:
             compte = comptes.donnees[entree['id_compte']]
@@ -450,7 +446,7 @@ class Transactions(Recap):
                                     res_compte = plafond['max_compte'] - (grant + comptabilise)
                                     res_mois = plafond['max_mois'] - comptabilise
                                     res = max(min(res_compte, res_mois), 0)
-                                    max_mo = montant * plafond['pourcentage'] / 100
+                                    max_mo = round(montant * plafond['pourcentage'] / 100, 2)
                                     mo = min(max_mo, res)
                                     if cg_id not in self.comptabilises.keys():
                                         self.comptabilises[cg_id] = {'id_compte': compte['id_compte'],

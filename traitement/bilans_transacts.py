@@ -80,10 +80,13 @@ class BilansTransacts(object):
                 if id_compte not in pcc.keys():
                     pcc[id_compte] = {}
                 pccd = pcc[id_compte]
-                if id_article not in pccd.keys():
-                    pccd[id_article] = [key]  # => annexe subsides
+                if id_plateforme not in pccd.keys():
+                    pccd[id_plateforme] = {}
+                pccdp = pccd[id_plateforme]
+                if id_article not in pccdp.keys():
+                    pccdp[id_article] = [key]  # => annexe subsides
                 else:
-                    pccd[id_article].append(key)
+                    pccdp[id_article].append(key)
 
             if id_plateforme not in par_plate.keys():
                 par_plate[id_plateforme] = {'clients': {}, 'items': {}, 'users': {}, 'machines': {}, 'projets': {}}

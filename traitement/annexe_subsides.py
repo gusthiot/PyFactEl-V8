@@ -105,20 +105,22 @@ class AnnexeSubsides(object):
                             subs = 0
                             g_id = id_compte + id_plateforme + id_article
                             if g_id in grants.donnees.keys():
-                                grant, info = Outils.est_un_nombre(grants.donnees[g_id]['montant'], "le montant de grant",
-                                                                   min=0, arrondi=2)
+                                grant, info = Outils.est_un_nombre(grants.donnees[g_id]['montant'],
+                                                                   "le montant de grant", min=0, arrondi=2)
                                 if info != "":
                                     Outils.affiche_message(info)
                             else:
                                 grant = 0
                             if code in par_client and id_compte in par_client[code]['comptes']:
                                 par_code = par_client[code]['comptes'][id_compte]
-                                if id_article in par_code.keys():
-                                    tbtr = par_code[id_article]
-                                    for indice in tbtr:
-                                        val, info = Outils.est_un_nombre(trans_vals[indice]['subsid-CHF'], "le subside CHF",
-                                                                         arrondi=2)
-                                        subs += val
+                                if id_plateforme in par_code.keys():
+                                    par_plate = par_code[id_plateforme]
+                                    if id_article in par_plate.keys():
+                                        tbtr = par_plate[id_article]
+                                        for indice in tbtr:
+                                            val, info = Outils.est_un_nombre(trans_vals[indice]['subsid-CHF'],
+                                                                             "le subside CHF", arrondi=2)
+                                            subs += val
 
                             reste = plafond['max_compte'] - grant - subs
                             ligne += [round(grant, 2), round(subs, 2), round(reste, 2)]
