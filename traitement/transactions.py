@@ -454,6 +454,7 @@ class Transactions(Recap):
                                     mo = min(max_mo, res)
                                     if cg_id not in self.comptabilises.keys():
                                         self.comptabilises[cg_id] = {'id_compte': compte['id_compte'],
+                                                                     'id_plateforme': article['platf-code'],
                                                                      'id_article': article['item-idsap'],
                                                                      'montant': mo}
                                     else:

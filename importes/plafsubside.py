@@ -67,7 +67,7 @@ class PlafSubside(Fichier):
             donnee['max_compte'], info = Outils.est_un_nombre(donnee['max_compte'], "le max compte", ligne, 2, 0)
             msg += info
 
-            donnees_dict[donnee['type'] + donnee['id_article']] = donnee
+            donnees_dict[donnee['type'] + donnee['id_plateforme'] + donnee['id_article']] = donnee
             ligne += 1
 
         self.donnees = donnees_dict
