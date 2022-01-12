@@ -60,7 +60,7 @@ class Granted(Fichier):
             donnee['montant'], info = Outils.est_un_nombre(donnee['montant'], "le montant comptabilisé", ligne, 2, 0)
             msg += info
 
-            donnees_dict[donnee['id_compte']+donnee['id_article']] = donnee
+            donnees_dict[donnee['id_compte'] + donnee['id_plateforme'] + donnee['id_article']] = donnee
             ligne += 1
 
         self.donnees = donnees_dict
