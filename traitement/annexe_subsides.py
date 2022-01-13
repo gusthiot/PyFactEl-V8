@@ -97,11 +97,11 @@ class AnnexeSubsides(object):
                         plaf = type_s + id_plateforme + id_article
                         if plaf in plafonds.donnees.keys():
                             plafond = plafonds.donnees[plaf]
-                            ligne = [self.annee, self.mois, id_plateforme, client['code'], client['abrev_labo'],
-                                     compte['id_compte'], compte['intitule'], id_article,
-                                     artsap.donnees[id_article]['intitule_long'], subside['type'], subside['intitule'],
-                                     subside['debut'], subside['fin'], plafond['pourcentage'], plafond['max_compte'],
-                                     plafond['max_mois']]
+                            ligne = [self.annee, self.mois, plateformes.donnees[id_plateforme]['intitule'],
+                                     client['code'], client['abrev_labo'], compte['id_compte'], compte['intitule'],
+                                     id_article, artsap.donnees[id_article]['intitule_long'], subside['type'],
+                                     subside['intitule'], subside['debut'], subside['fin'], plafond['pourcentage'],
+                                     plafond['max_compte'], plafond['max_mois']]
                             subs = 0
                             g_id = id_compte + id_plateforme + id_article
                             if g_id in grants.donnees.keys():
