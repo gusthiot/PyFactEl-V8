@@ -12,7 +12,10 @@ class UserLabo(Fichier):
     libelle = "User labo"
 
     def __init__(self, dossier_source, edition):
-        self.nom_fichier = "User-labo_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois-1) + ".csv"
+        if edition.mois > 1:
+            self.nom_fichier = "User-labo_" + str(edition.annee) + "_" + Outils.mois_string(edition.mois-1) + ".csv"
+        else:
+            self.nom_fichier = "User-labo_" + str(edition.annee-1) + "_" + Outils.mois_string(12) + ".csv"
         super().__init__(dossier_source)
 
     def est_coherent(self, plateformes, clients, users):
