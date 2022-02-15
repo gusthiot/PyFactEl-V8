@@ -7,9 +7,9 @@ class BilanPlates(object):
     """
 
     cles = ['invoice-year', 'invoice-month', 'invoice-ref', 'platf-code', 'platf-op', 'platf-sap', 'platf-name',
-            'platf-cf', 'platf-fund', 'client-code', 'client-sap', 'client-name', 'client-class', 'client-labelclass',
-            'item-codeD', 'item-labelcode', 'item-sap', 'valuation-brut', 'valuation-net', 'deduct-CHF',
-            'subsid-deduct', 'total-fact', 'discount-bonus', 'subsid-bonus', 'OP-code']
+            'platf-cf', 'platf-fund', 'client-code', 'client-sap', 'client-name', 'client-idclass', 'client-class',
+            'client-labelclass', 'item-idsap', 'item-codeD', 'item-labelcode', 'item-sap', 'valuation-brut',
+            'valuation-net', 'deduct-CHF', 'subsid-deduct', 'total-fact', 'discount-bonus', 'subsid-bonus', 'OP-code']
 
     def __init__(self, edition, paramtexte):
         """
