@@ -66,7 +66,7 @@ class Facture(object):
             if self.prod2qual and not (self.prod2qual.code_client_existe(code_sap)):
                 continue
 
-            if classe['code_n'] == "I":
+            if classe['ref_fact'] == "INT":
                 genre = generaux.code_int
             else:
                 genre = generaux.code_ext
