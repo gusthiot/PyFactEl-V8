@@ -34,7 +34,7 @@ class BilansTransacts(object):
         self.stat_cli = StatClient(edition, paramtexte)
         self.stat_mach = StatMachine(edition, paramtexte)
 
-    def generer(self, trans_vals, grants, plafonds, comptes, clients, subsides, artsap, plateformes, userlabs,
+    def generer(self, trans_vals, grants, plafonds, comptes, clients, classes, subsides, artsap, plateformes, userlabs,
                 dossier_destination):
         """
         tri des transactions et génération des bilans
@@ -43,6 +43,7 @@ class BilansTransacts(object):
         :param plafonds: plafonds importés
         :param comptes: comptes importés
         :param clients: clients importés
+        :param classes: classes clients importées
         :param subsides: subsides importés
         :param artsap: articles SAP importés
         :param plateformes: plateformes importées
@@ -192,4 +193,4 @@ class BilansTransacts(object):
                 pm['clients'][code].append(user)
 
         self.stat_nb_user.generer(dossier_destination, par_plate_ul)
-        self.stat_cli.generer(trans_vals, dossier_destination, par_plate, par_plate_ul)
+        self.stat_cli.generer(trans_vals, dossier_destination, par_plate, par_plate_ul, clients, classes)
