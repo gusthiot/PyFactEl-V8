@@ -71,7 +71,7 @@ class StatClient(object):
                     classe = classes.donnees[client['id_classe']]
                     lc = ll + [client['code'], client['code_sap'], client['abrev_labo'], client['id_classe'],
                                classe['code_n'], classe['intitule']]
-                    if code in par_client:
+                    if code in par_client.keys():
                         tbtr = par_plate[id_plateforme]['clients'][code]['transactions']
                         ligne = lc
                         stat_run = 0
